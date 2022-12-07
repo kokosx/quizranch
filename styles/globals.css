@@ -1,26 +1,98 @@
-html,
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.kit-button {
+  @apply flex items-center justify-center w-full md:w-72 lg:w-96 h-24 md:h-40 bg-base-100 rounded-md border-[3px] border-secondary text-xl hover:bg-base-300 duration-200 hover:scale-105 active:scale-95;
+}
+/*
 body {
-  padding: 0;
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  @apply text-white text-3xl bg-black;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+.btn {
+  @apply bg-sky-600 p-2 rounded-md text-lg hover:scale-95 active:scale-105 hover:bg-sky-700 active:bg-sky-500 duration-200 ease-in-out;
 }
 
-* {
-  box-sizing: border-box;
+input[type="text"],
+input[type="password"],
+input[type="email"] {
+  @apply w-full bg-black rounded-md active:outline-none  focus:ring-2  text-base outline-none border-2 border-sky-700  py-1 px-3 leading-8 transition-colors duration-300 ease-in-out;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+
+
+.kit-button {
+  @apply flex items-center justify-center  w-96 rounded-md border-2 border-sky-900 h-24 md:h-40 bg-gray-900 hover:scale-105 active:scale-95 hover:border-sky-800 active:border-sky-700 duration-200 ease-in-out;
+}
+*/
+/*
+.toast {
+  background-color: blue;
+  visibility: hidden; /* Hidden by default. Visible on click 
+  min-width: 250px; /* Set a default minimum width 
+  margin-left: -125px; /* Divide value of min-width by 2 
+  background-color: #333; /* Black background color 
+  color: #fff; /* White text color 
+  text-align: center; /* Centered text 
+  border-radius: 2px; /* Rounded borders 
+  padding: 16px; /* Padding 
+  position: fixed;  Sit on top of the screen 
+  z-index: 1; /* Add a z-index if needed 
+  left: 50%; /* Center the snackbar 
+  bottom: 30px; /* 30px from the bottom 
+}
+*/
+/*
+.toast .visible-toast {
+  visibility: visible; /* Show the snackbar */
+/* Add animation: Take 0.5 seconds to fade in and out the snackbar.
+  However, delay the fade out process for 2.5 seconds 
+  -webkit-animation: fadein 0.5s, fadeout 0.5s 2.5s;
+  animation: fadein 0.5s, fadeout 0.5s 2.5s;
+}
+
+@-webkit-keyframes fadein {
+  from {
+    bottom: 0;
+    opacity: 0;
   }
-  body {
-    color: white;
-    background: black;
+  to {
+    bottom: 30px;
+    opacity: 1;
   }
 }
+
+@keyframes fadein {
+  from {
+    bottom: 0;
+    opacity: 0;
+  }
+  to {
+    bottom: 30px;
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes fadeout {
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes fadeout {
+  from {
+    bottom: 30px;
+    opacity: 1;
+  }
+  to {
+    bottom: 0;
+    opacity: 0;
+  }
+}
+*/

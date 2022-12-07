@@ -1,0 +1,51 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @default(uuid()) @unique @id
+  email String @unique
+  password String
+  nickname String
+
+  sessions Session[]
+  kits Kit[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Kit {
+  id String @default(uuid()) @unique @id
+
+  user User @relation(fields: [createdBy],references: [id], onDelete: Cascade)
+  createdBy String
+
+  name String
+  description String @default("")
+  data Json
+
+  createdAt DateTime @default(now())
+}
+
+model Session {
+  id String  @id @unique
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  csrfTokens CsrfToken?
+}
+
+model CsrfToken {
+  id String @id @unique
+  session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId String @unique
+} 
