@@ -23,7 +23,8 @@ const KitEditor = ({
   );
   const [error, setError] = useState<false | string>(false);
   const [loading, setLoading] = useState(false);
-  const addKit = trpc.notes.addNote.useMutation();
+  const addKit = trpc.notes.addKit.useMutation();
+  const modifyKit = trpc.notes.editKitById.useMutation();
 
   const router = useRouter();
 
@@ -39,9 +40,32 @@ const KitEditor = ({
     setLoading(true);
     //Set csrf
     csrfHeader.value = csrfToken;
+    //Edit
+    if (initialData) {
+      try {
+        await modifyKit.mutateAsync({
+          data,
+          name,
+          description,
+          kitId: initialData.id,
+        });
+
+        router.push(`/kit/${initialData.id}`);
+      } catch (error) {
+        if (error instanceof TRPCClientError) {
+          //If failed, generate new token from getServerSideProps
+          router.replace(router.asPath);
+          setError(serializeKitRouterError(error));
+        }
+      }
+
+      return;
+    }
+    //Else create new
     try {
-      await addKit.mutateAsync({ data, name, description });
-      router.push("/dashboard");
+      const res = await addKit.mutateAsync({ data, name, description });
+
+      router.push(`/kit/${res.note.id}`);
     } catch (error) {
       if (error instanceof TRPCClientError) {
         //If failed, generate new token from getServerSideProps

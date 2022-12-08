@@ -16,7 +16,7 @@ const kitSchema = z.object({
 });
 
 export const kitsRouter = router({
-  addNote: authorizedProcedure
+  addKit: authorizedProcedure
     .input(kitSchema)
     .mutation(async ({ input, ctx }) => {
       if (ctx.session.user.kits.length >= 5) {
