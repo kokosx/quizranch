@@ -1,11 +1,9 @@
-import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import { FormEvent, useEffect, useState } from "react";
 import Layout from "../components/layout";
-import { Spinner } from "../components/Spinner";
-import { isUserLoggedIn } from "../services/auth.service";
 
-import { withPageAuth, withPageAuthSession } from "../utils/ssr";
+import { isUserLoggedIn } from "../services/auth.service";
 
 import { trpc } from "../utils/trpc";
 
@@ -16,6 +14,7 @@ const Login = () => {
 
   const register = trpc.auth.register.useMutation();
   const login = trpc.auth.login.useMutation();
+  const [error, setError] = useState<false | string>(false);
 
   const router = useRouter();
 
@@ -29,6 +28,18 @@ const Login = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    setError(false);
+    //Validate
+
+    if (nickname.length < 3 && tab === "register") {
+      setError("Nick musi mieć przynajmniej 3 znaki");
+      return;
+    }
+    if (password.length < 5) {
+      setError("Hasło musi mieć przynajmniej 5 znaków");
+      return;
+    }
 
     if (tab === "login") {
       login.mutate({ email, password });
@@ -94,7 +105,11 @@ const Login = () => {
             Dalej
           </button>
           <p className="text-sm text-red-500">
-            {tab === "login" ? login.error?.message : register.error?.message}
+            {error
+              ? error
+              : tab === "login"
+              ? login.error?.message
+              : register.error?.message}
           </p>
 
           <p className="mt-3 text-xs text-gray-500">

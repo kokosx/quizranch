@@ -1,12 +1,14 @@
 import { GetServerSidePropsContext } from "next";
+import { Education } from "../components/Education";
 import Layout from "../components/layout";
 import { isUserLoggedIn } from "../services/auth.service";
-import { withPageAuth, withPageAuthSession } from "../utils/ssr";
 
 const Login = () => {
   return (
     <Layout title="Strona główna">
-      <p>Hello!</p>
+      <div className="flex flex-col items-center w-full h-full">
+        <Education />
+      </div>
     </Layout>
   );
 };
