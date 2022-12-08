@@ -1,0 +1,16 @@
+{
+  "name": "Quizranch",
+
+  "icons": [
+    {
+      "src": "./logo.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "theme_color": "#828DF8",
+  "background_color": "#0F1729",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait"
+}

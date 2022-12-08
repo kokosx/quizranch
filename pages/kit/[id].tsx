@@ -39,7 +39,7 @@ const Kit = ({ isCreator, isLoggedIn, kit }: Props) => {
   };
 
   return (
-    <Layout user={isLoggedIn}>
+    <Layout user={isLoggedIn} title="Ucz się">
       <div className="flex flex-col gap-y-4">
         <h2 className="text-4xl font-semibold text-secondary">{kit.name}</h2>
 
@@ -84,7 +84,6 @@ const Kit = ({ isCreator, isLoggedIn, kit }: Props) => {
         {isCreator && (
           <div className="flex gap-x-2">
             <button className="btn btn-secondary">Edytuj</button>
-            <button className="btn btn-error">Usuń</button>
           </div>
         )}
       </div>
@@ -97,16 +96,17 @@ export default Kit;
 export const getServerSideProps = async (
   ctx: GetServerSidePropsContext
 ): Promise<GetServerSidePropsResult<any>> => {
+  const id = ctx.params?.id as unknown as string | null;
+  if (!id) {
+    return { redirect: { permanent: false, destination: "/dashboard" } };
+  }
+
   const session = await isUserLoggedIn(ctx.req);
   const caller = kitsRouter.createCaller({
     prismaClient,
     req: ctx.req,
     res: ctx.res,
   });
-  const id = ctx.params?.id as unknown as string | null;
-  if (!id) {
-    return { redirect: { permanent: false, destination: "/dashboard" } };
-  }
   let isLoggedIn = false;
   if (session?.user.id) {
     isLoggedIn = true;

@@ -14,7 +14,7 @@ const Dashboard = ({ kits }: { kits: Kit[] }) => {
   const [error, setError] = useState<false | string>(false);
 
   return (
-    <Layout user>
+    <Layout user title="Dashboard">
       <div>
         <h3 className="text-4xl font-semibold text-secondary">Twoje zestawy</h3>
         <div className="flex flex-col flex-wrap justify-center gap-4 mt-4 lg:gap-8 md:justify-start md:flex-row">

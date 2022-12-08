@@ -67,7 +67,7 @@ const Add = ({ csrfToken }: { csrfToken: string }) => {
   };
 
   return (
-    <Layout user>
+    <Layout title="Dodaj nowy zestaw" user>
       <h2 className="text-4xl font-semibold text-secondary">
         Dodaj nowy zestaw
       </h2>

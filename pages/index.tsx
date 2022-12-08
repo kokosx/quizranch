@@ -5,7 +5,7 @@ import { withPageAuth, withPageAuthSession } from "../utils/ssr";
 
 const Login = () => {
   return (
-    <Layout>
+    <Layout title="Strona główna">
       <p>Hello!</p>
     </Layout>
   );

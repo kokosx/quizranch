@@ -1,3 +1,4 @@
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { ReactNode, useEffect } from "react";
@@ -6,15 +7,25 @@ import { trpc } from "../utils/trpc";
 const Layout = ({
   children,
   user,
+  title,
 }: {
   children: ReactNode;
   user?: boolean;
+  title: string;
 }) => {
   const router = useRouter();
   const logout = trpc.auth.logout.useMutation();
 
   return (
     <>
+      <Head>
+        <title>{title}</title>
+        <meta name="viewport" content="initial-scale=1.0, width=device-width" />
+        <meta charSet="UTF-8" />
+        <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="description" content="Create learning kits" />
+        <link rel="manifest" href="/manifest.json" />
+      </Head>
       <div className="container flex flex-col justify-center p-2 mx-auto">
         <nav className="p-0 pb-2 navbar bg-base-100">
           <div className="flex-1">

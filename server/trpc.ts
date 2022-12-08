@@ -32,26 +32,17 @@ const isAuthedToMutate = t.middleware(async ({ ctx, next }) => {
   }
   const session = await isUserLoggedIn(ctx.req);
   if (!session) {
-    console.log("no session");
-
     throw new TRPCError({ code: "FORBIDDEN" });
   }
   const token = ctx.req.headers["csrf-token"] as unknown as string;
 
-  /*const hashedCsrf = createHmac("SHA512", process.env.CSRF_SECRET)
-    //@ts-expect-error
-    .update(ctx.req.headers["csrf-token"])
-    .digest("hex");*/
-  console.log("token:", token);
-  console.log("sessionid:", session.id);
   const { count } = await ctx.prismaClient.csrfToken.deleteMany({
     where: { id: token, sessionId: session.id },
   });
   if (count !== 1) {
     throw new TRPCError({ code: "FORBIDDEN", message: "NO-CSRF" });
-  } else {
-    return next({ ctx: { session } });
   }
+  return next({ ctx: { session } });
 });
 
 export const authorizedProcedure = procedure.use(isAuthedToMutate);
