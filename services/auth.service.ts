@@ -29,17 +29,14 @@ export const isUserLoggedIn = async (req: GetServerSidePropsContext["req"]) => {
     },
   });
   if (!session) {
-    return null;
+    return { session: null, generateCSRF: null };
   }
-  return session;
+  const generateCSRF = async () => await _generateCSRFToken(session.id);
+  return { session, generateCSRF };
 };
 
-export const generateCSRFToken = async (hashedSessionId: string) => {
+export const _generateCSRFToken = async (hashedSessionId: string) => {
   const token = crypto.randomBytes(250).toString("hex");
-
-  /*const hashedToken = createHmac("SHA512", process.env.CSRF_SECRET)
-    .update(random)
-    .digest("hex");*/
 
   await prismaClient.csrfToken.deleteMany({
     where: { sessionId: hashedSessionId },

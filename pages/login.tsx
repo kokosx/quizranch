@@ -131,8 +131,8 @@ const Login = () => {
 export default Login;
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
-  const session = await isUserLoggedIn(ctx.req);
-  if (session) {
+  const auth = await isUserLoggedIn(ctx.req);
+  if (auth?.session) {
     return {
       redirect: {
         destination: "/dashboard",

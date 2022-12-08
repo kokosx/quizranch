@@ -1,11 +1,12 @@
 import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
-import { kitsRouter } from "../../server/routers/kits";
-import { isUserLoggedIn } from "../../services/auth.service";
-import { prismaClient } from "../../server/prisma";
+import { kitsRouter } from "../../../server/routers/kits";
+import { isUserLoggedIn } from "../../../services/auth.service";
+import { prismaClient } from "../../../server/prisma";
 import { Kit } from "@prisma/client";
-import Layout from "../../components/layout";
-import { KitData } from "../../types";
+import Layout from "../../../components/layout";
+import { KitData } from "../../../types";
 import { useState } from "react";
+import Link from "next/link";
 
 type Props = {
   isLoggedIn: boolean;
@@ -83,7 +84,9 @@ const Kit = ({ isCreator, isLoggedIn, kit }: Props) => {
         <p className="text-accent">Utworzone przez {kit.user.nickname}</p>
         {isCreator && (
           <div className="flex gap-x-2">
-            <button className="btn btn-secondary">Edytuj</button>
+            <Link href={`/kit/${kit.id}/edit`} className="btn btn-secondary">
+              Edytuj
+            </Link>
           </div>
         )}
       </div>
@@ -101,19 +104,19 @@ export const getServerSideProps = async (
     return { redirect: { permanent: false, destination: "/dashboard" } };
   }
 
-  const session = await isUserLoggedIn(ctx.req);
+  const auth = await isUserLoggedIn(ctx.req);
   const caller = kitsRouter.createCaller({
     prismaClient,
     req: ctx.req,
     res: ctx.res,
   });
   let isLoggedIn = false;
-  if (session?.user.id) {
+  if (auth?.session?.user.id) {
     isLoggedIn = true;
   }
   const kit = await caller.getKitById({ kitId: id });
 
-  const isCreator = session?.user.id === kit.createdBy;
+  const isCreator = auth?.session?.user.id === kit.createdBy;
   return {
     props: { isCreator, isLoggedIn, kit: JSON.parse(JSON.stringify(kit)) },
   };

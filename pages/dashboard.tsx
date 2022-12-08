@@ -68,20 +68,20 @@ export default Dashboard;
 export const getServerSideProps = async (
   ctx: GetServerSidePropsContext
 ): Promise<GetServerSidePropsResult<any>> => {
-  const session = await isUserLoggedIn(ctx.req);
+  const auth = await isUserLoggedIn(ctx.req);
+  if (!auth?.session) {
+    return {
+      redirect: { destination: "/login", permanent: false },
+    };
+  }
   const caller = kitsRouter.createCaller({
     prismaClient,
     req: ctx.req,
     res: ctx.res,
   });
-  if (!session) {
-    return {
-      redirect: { destination: "/login", permanent: false },
-    };
-  }
 
   const kits = await caller.getUsersNotesByNewest({
-    userId: session.userId,
+    userId: auth.session.userId,
   });
   return { props: { kits: JSON.parse(JSON.stringify(kits)) } };
 };

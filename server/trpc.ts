@@ -30,7 +30,9 @@ const isAuthedToMutate = t.middleware(async ({ ctx, next }) => {
   if (!ctx.req.headers["csrf-token"] || !ctx.req.cookies["sessionId"]) {
     throw new TRPCError({ code: "FORBIDDEN" });
   }
-  const session = await isUserLoggedIn(ctx.req);
+
+  const auth = await isUserLoggedIn(ctx.req);
+  const session = auth?.session;
   if (!session) {
     throw new TRPCError({ code: "FORBIDDEN" });
   }

@@ -3,11 +3,10 @@ import { compare, hash } from "bcrypt";
 import { createHmac } from "crypto";
 import { z } from "zod";
 import { setSessionCookie } from "../../apiUtils/cookies";
-import { authorizedProcedure, procedure, router } from "../trpc";
+import { procedure, router } from "../trpc";
 import crypto from "crypto";
 import { deleteCookie } from "cookies-next";
 import omit from "object.omit";
-import { generateCSRFToken } from "../../services/auth.service";
 
 export const authRouter = router({
   register: procedure
