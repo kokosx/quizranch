@@ -63,7 +63,7 @@ export const kitsRouter = router({
     }),
   deleteKitById: authorizedProcedure
     .input(z.object({ kitId: z.string() }))
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       if (
         ctx.session.user.kits.filter((v) => v.id === input.kitId).length !== 1
       ) {

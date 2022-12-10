@@ -23,8 +23,12 @@ const KitEditor = ({
   );
   const [error, setError] = useState<false | string>(false);
   const [loading, setLoading] = useState(false);
+  //TRPC Mutations
   const addKit = trpc.notes.addKit.useMutation();
   const modifyKit = trpc.notes.editKitById.useMutation();
+  const deleteKit = trpc.notes.deleteKitById.useMutation();
+
+  const [deleteModal, setDeleteModal] = useState(false);
 
   const router = useRouter();
 
@@ -58,22 +62,36 @@ const KitEditor = ({
           setError(serializeKitRouterError(error));
         }
       }
+    } else {
+      //Else create new
+      try {
+        const res = await addKit.mutateAsync({ data, name, description });
 
-      return;
+        router.push(`/kit/${res.note.id}`);
+      } catch (error) {
+        if (error instanceof TRPCClientError) {
+          //If failed, generate new token from getServerSideProps
+          router.replace(router.asPath);
+          setError(serializeKitRouterError(error));
+        }
+      }
     }
-    //Else create new
-    try {
-      const res = await addKit.mutateAsync({ data, name, description });
 
-      router.push(`/kit/${res.note.id}`);
+    setLoading(false);
+  };
+
+  const handleDeleteKit = async () => {
+    csrfHeader.value = csrfToken;
+    try {
+      //@ts-expect-error
+      await deleteKit.mutateAsync({ kitId: initialData.id });
+      router.push("/");
     } catch (error) {
       if (error instanceof TRPCClientError) {
-        //If failed, generate new token from getServerSideProps
         router.replace(router.asPath);
         setError(serializeKitRouterError(error));
       }
     }
-    setLoading(false);
   };
 
   const addNewItem = () => {
@@ -161,13 +179,52 @@ const KitEditor = ({
           </div>
         ))}
 
-        <span>
+        <span className="flex gap-x-2">
           <button
             onClick={addNote}
             className={`btn btn-primary ${loading && "loading"}`}
           >
             Zatwierdź
           </button>
+          {initialData && (
+            <>
+              <div
+                onClick={() => setDeleteModal(false)}
+                className={`cursor-pointer modal ${
+                  deleteModal && "modal-open"
+                }`}
+              >
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  className="relative modal-box"
+                >
+                  <h3 className="text-lg font-bold">
+                    Czy na pewno chcesz usunąć zestaw?
+                  </h3>
+                  <div className="flex justify-center gap-x-2">
+                    <button
+                      onClick={() => setDeleteModal(false)}
+                      className="btn btn-primary"
+                    >
+                      Nie
+                    </button>
+                    <button
+                      onClick={() => handleDeleteKit()}
+                      className="btn btn-secondary"
+                    >
+                      Tak
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setDeleteModal(true)}
+                className="btn btn-error"
+              >
+                Usuń
+              </button>
+            </>
+          )}
         </span>
       </div>
       {error && (

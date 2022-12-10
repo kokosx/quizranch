@@ -74,7 +74,7 @@ const Layout = ({
                         router.push("/");
                       }}
                     >
-                      Logout
+                      Wyloguj się
                     </button>
                   </li>
                 </ul>
