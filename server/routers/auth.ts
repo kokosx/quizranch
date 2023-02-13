@@ -13,7 +13,7 @@ export const authRouter = router({
   register: procedure
     .input(
       z.object({
-        email: z.string().email(),
+        email: z.string().email("INVALID_EMAIL"),
         password: z.string().min(5),
         nickname: z.string().min(3).max(15),
       })

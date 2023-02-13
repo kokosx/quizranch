@@ -1,4 +1,4 @@
-import { GetServerSidePropsContext } from "next";
+import type { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import { FormEvent, useEffect, useState } from "react";
 import Layout from "../components/layout";
@@ -22,7 +22,13 @@ const Login = () => {
     if (register.status === "success" || login.status === "success") {
       router.push("/dashboard");
     }
-  }, [login.status, register.status, router]);
+    if (register.error) {
+      setError(register.error.message);
+    }
+    if (login.error) {
+      setError(login.error.message);
+    }
+  }, [login.status, register.status, router, login.error, register.error]);
 
   const [tab, setTab] = useState<"register" | "login">("register");
 
@@ -31,7 +37,14 @@ const Login = () => {
 
     setError(false);
     //Validate
-
+    const isEmailValid = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
+      email
+    );
+    console.log(isEmailValid);
+    if (!isEmailValid) {
+      setError("Email jest niepawidłowy");
+      return;
+    }
     if (nickname.length < 3 && tab === "register") {
       setError("Nick musi mieć przynajmniej 3 znaki");
       return;
