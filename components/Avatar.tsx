@@ -8,9 +8,10 @@ type Props = {
     nickname: string;
     [key: string]: any;
   };
+  size?: number;
 };
 
-const Avatar = ({ data }: Props) => {
+const Avatar = ({ data, size }: Props) => {
   const generateAvatar = () => {
     return createAvatar(botttsNeutral, {
       seed: data.avatarSeed ?? data.nickname,
@@ -19,7 +20,14 @@ const Avatar = ({ data }: Props) => {
     }).toDataUriSync();
   };
 
-  return <Image src={generateAvatar()} height={40} width={40} alt="avatar" />;
+  return (
+    <Image
+      src={generateAvatar()}
+      height={size ?? 40}
+      width={size ?? 40}
+      alt="avatar"
+    />
+  );
 };
 
 export default Avatar;

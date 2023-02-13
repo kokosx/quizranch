@@ -4,6 +4,7 @@ import { isUserLoggedIn } from "./../../services/auth.service";
 import { prismaClient } from "../../server/prisma";
 import { usersRouter } from "../../server/routers/user";
 import { Kit, User } from "@prisma/client";
+import Avatar from "../../components/Avatar";
 
 type Props = {
   nickname?: string;
@@ -13,7 +14,21 @@ type Props = {
 const Profile = ({ data, nickname }: Props) => {
   return (
     <Layout nickname={nickname} title={`Profil ${data.nickname}`}>
-      <p>fds</p>
+      <div className="flex flex-col">
+        <div className="flex">
+          <div className="flex flex-col gap-y-4">
+            <h5 className="text-4xl font-semibold text-secondary">
+              {data.nickname}
+            </h5>
+            <Avatar data={data} size={200} />
+          </div>
+          <div className="w-full px-6">
+            <p className="w-full h-full p-2 text-3xl font-medium textarea textarea-bordered">
+              {data.description ?? "Brak opisu..."}
+            </p>
+          </div>
+        </div>
+      </div>
     </Layout>
   );
 };
