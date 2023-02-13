@@ -8,8 +8,6 @@ import { deleteCookie } from "cookies-next";
 import omit from "object.omit";
 import _hash from "./../utils/hash";
 import { SESSION_ID_LENGTH } from "../../constants";
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
-import { User } from "@prisma/client";
 
 export const authRouter = router({
   register: procedure
@@ -17,7 +15,7 @@ export const authRouter = router({
       z.object({
         email: z.string().email(),
         password: z.string().min(5),
-        nickname: z.string().min(3),
+        nickname: z.string().min(3).max(15),
       })
     )
     .mutation(async ({ input, ctx }) => {

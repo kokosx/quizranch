@@ -36,6 +36,10 @@ const Login = () => {
       setError("Nick musi mieć przynajmniej 3 znaki");
       return;
     }
+    if (nickname.length >= 15 && tab === "register") {
+      setError("Nick może mieć maksymalnie 15 znaków");
+      return;
+    }
     if (password.length < 5) {
       setError("Hasło musi mieć przynajmniej 5 znaków");
       return;
