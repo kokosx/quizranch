@@ -25,9 +25,9 @@ const KitEditor = ({
   const [error, setError] = useState<false | string>(false);
   const [loading, setLoading] = useState(false);
   //TRPC Mutations
-  const addKit = trpc.notes.addKit.useMutation();
-  const modifyKit = trpc.notes.editKitById.useMutation();
-  const deleteKit = trpc.notes.deleteKitById.useMutation();
+  const addKit = trpc.kit.addKit.useMutation();
+  const modifyKit = trpc.kit.editKitById.useMutation();
+  const deleteKit = trpc.kit.deleteKitById.useMutation();
 
   const [deleteModal, setDeleteModal] = useState(false);
 

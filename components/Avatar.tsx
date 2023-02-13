@@ -4,7 +4,7 @@ import Image from "next/image";
 
 type Props = {
   data: {
-    avatarSeed: string | null;
+    avatarSeed?: string | null;
     nickname: string;
     [key: string]: any;
   };

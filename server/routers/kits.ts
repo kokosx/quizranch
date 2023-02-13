@@ -132,14 +132,16 @@ export const kitsRouter = router({
       }
     }),
   searchForKit: procedure
-    .input(z.object({ name: z.string() }))
+    .input(z.object({ name: z.string(), skip: z.number().default(0) }))
     .query(async ({ ctx, input }) => {
       return await ctx.prismaClient.kit.findMany({
         where: { name: { contains: input.name, mode: "insensitive" } },
         take: 10,
+        skip: input.skip,
         select: {
           id: true,
           name: true,
+
           description: true,
           user: { select: { avatarSeed: true, nickname: true } },
         },

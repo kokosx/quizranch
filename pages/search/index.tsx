@@ -6,11 +6,13 @@ import Avatar from "../../components/Avatar";
 import Link from "next/link";
 import { isUserLoggedIn } from "../../services/auth.service";
 import { usersRouter } from "../../server/routers/user";
+import { trpc } from "../../utils/trpc";
+import { useEffect, useState } from "react";
 
 type _Kit = {
   user: {
     nickname: string;
-    avatarSeed: string | null;
+    avatarSeed?: string | null;
   };
   id: string;
   name: string;
@@ -19,65 +21,165 @@ type _Kit = {
 
 type _User = {
   nickname: string;
-  avatarSeed: string;
+  avatarSeed?: string | null;
 };
 
 type Props = {
+  key: string;
   searchText: string;
   type: "kit" | "user";
-  kits: _Kit[];
-  users: _User[];
+  _kits: _Kit[];
+  _users: _User[];
   nickname?: string;
 };
 
-const SearchResults = ({ searchText, kits, nickname, type, users }: Props) => {
+const SearchResults = ({
+  searchText,
+  _kits,
+  nickname,
+  type,
+  _users,
+}: Props) => {
+  const [kits, setKits] = useState(_kits);
+  const [users, setUsers] = useState(_users);
+  const [kitsSkipped, setKitsSkipped] = useState(10);
+  const [usersSkipped, setUsersSkipped] = useState(10);
+  const [isMoreUsers, setIsMoreUsers] = useState(users.length === 10);
+  const [isMoreKits, setIsMoreKits] = useState(kits.length === 10);
+
+  const moreKits = trpc.kit.searchForKit.useQuery(
+    { name: searchText, skip: kitsSkipped },
+    { enabled: false }
+  );
+  const moreUsers = trpc.user.searchForUser.useQuery(
+    { nickname: searchText, skip: usersSkipped },
+    { enabled: false }
+  );
+
+  //Piekło:
+  useEffect(() => {
+    if (moreUsers.fetchStatus === "idle" && moreUsers.data && isMoreUsers) {
+      const prev = [...users];
+      const toSet = prev.concat(moreUsers.data);
+      setUsersSkipped(usersSkipped + moreUsers.data.length);
+
+      if (moreUsers.data.length < 10) {
+        setIsMoreUsers(false);
+      }
+      setUsers(toSet);
+    }
+    if (moreKits.fetchStatus === "idle" && moreKits.data && isMoreKits) {
+      const prev = [...kits];
+      const toSet = prev.concat(moreKits.data);
+      setKitsSkipped(kitsSkipped + moreKits.data.length);
+
+      if (moreKits.data.length < 10) {
+        setIsMoreKits(false);
+      }
+
+      setKits(toSet);
+    }
+  }, [
+    moreUsers.fetchStatus,
+    moreKits.fetchStatus,
+    kits,
+    kitsSkipped,
+    moreKits.data,
+    users,
+    usersSkipped,
+    moreUsers.data,
+    isMoreUsers,
+    isMoreKits,
+  ]);
+
+  const loadMore = (what: typeof type) => {
+    if (what === "kit") {
+      if (!isMoreKits) {
+        return;
+      }
+      moreKits.refetch();
+    } else if (what === "user") {
+      if (!isMoreUsers) {
+        return;
+      }
+      moreUsers.refetch();
+    }
+  };
   const renderSearchResults = () => {
     if (type === "kit") {
-      return kits.map((v) => (
-        <div key={v.id}>
-          <div className="flex p-2 rounded-md h-36 w-72 md:w-96 bg-neutral">
-            <div className="flex flex-col justify-between min-w-max ">
-              <h5 className="p-2 text-2xl font-semibold">
-                {v.name.substring(0, 15)}
-              </h5>
-              <Link href={`/profile/${v.user.nickname}`}>
-                <div className="flex items-center w-full p-2 border-2 border-transparent rounded-md gap-x-2 hover:border-accent">
-                  <span>
-                    {v.user.nickname.substring(0, 10)}
-                    {v.user.nickname.length >= 10 && "..."}
-                  </span>
+      return (
+        <>
+          {kits.map((v) => (
+            <div key={v.id}>
+              <div className="flex p-2 rounded-md h-36 w-72 md:w-96 bg-neutral">
+                <div className="flex flex-col justify-between min-w-max ">
+                  <h5 className="p-2 text-2xl font-semibold">
+                    {v.name.substring(0, 15)}
+                  </h5>
+                  <Link href={`/profile/${v.user.nickname}`}>
+                    <div className="flex items-center w-full p-2 border-2 border-transparent rounded-md gap-x-2 hover:border-accent">
+                      <span>
+                        {v.user.nickname.substring(0, 10)}
+                        {v.user.nickname.length >= 10 && "..."}
+                      </span>
 
-                  <Avatar data={v.user} />
+                      <Avatar data={v.user} />
+                    </div>
+                  </Link>
                 </div>
-              </Link>
+                <div className="flex items-end justify-end w-full h-full ">
+                  <Link href={`/kit/${v.id}`}>
+                    <button className="btn btn-secondary">Przejdź</button>
+                  </Link>
+                </div>
+              </div>
             </div>
-            <div className="flex items-end justify-end w-full h-full ">
-              <Link href={`/kit/${v.id}`}>
-                <button className="btn btn-secondary">Przejdź</button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      ));
+          ))}
+          {isMoreKits && (
+            <button
+              onClick={() => loadMore("kit")}
+              className={`flex items-center justify-center p-2 text-4xl font-semibold rounded-md cursor-pointer h-36 w-72 md:w-96 btn ${
+                moreKits.isFetching && "loading"
+              }`}
+            >
+              Pokaż więcej
+            </button>
+          )}
+        </>
+      );
     }
     if (type === "user") {
-      return users.map((v) => (
-        <div key={v.nickname}>
-          <div className="flex p-2 rounded-md h-36 w-72 md:w-96 bg-neutral">
-            <div className="flex flex-col justify-between min-w-max ">
-              <h5 className="flex p-2 text-2xl font-semibold gap-x-2">
-                {v.nickname.substring(0, 15)}
-                <Avatar data={v} />
-              </h5>
+      return (
+        <>
+          {users.map((v) => (
+            <div key={v.nickname}>
+              <div className="flex p-2 rounded-md h-36 w-72 md:w-96 bg-neutral">
+                <div className="flex flex-col justify-between min-w-max ">
+                  <h5 className="flex p-2 text-2xl font-semibold gap-x-2">
+                    {v.nickname.substring(0, 15)}
+                    <Avatar data={v} />
+                  </h5>
+                </div>
+                <div className="flex items-end justify-end w-full h-full ">
+                  <Link href={`/profile/${v.nickname}`}>
+                    <button className="btn btn-secondary">Przejdź</button>
+                  </Link>
+                </div>
+              </div>
             </div>
-            <div className="flex items-end justify-end w-full h-full ">
-              <Link href={`/profile/${v.nickname}`}>
-                <button className="btn btn-secondary">Przejdź</button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      ));
+          ))}
+          {isMoreUsers && (
+            <button
+              onClick={() => loadMore("user")}
+              className={`flex items-center justify-center p-2 text-4xl font-semibold rounded-md cursor-pointer h-36 w-72 md:w-96 btn ${
+                moreKits.isFetching && "loading"
+              }`}
+            >
+              Pokaż więcej
+            </button>
+          )}
+        </>
+      );
     }
   };
   return (
@@ -104,10 +206,8 @@ const SearchResults = ({ searchText, kits, nickname, type, users }: Props) => {
             Użytkownicy
           </Link>
         </div>
-        <div className="flex flex-col flex-wrap justify-center gap-4 lg:gap-8 md:justify-start md:flex-row">
+        <div className="flex flex-col flex-wrap justify-center gap-4 mt-4 lg:gap-8 md:justify-start md:flex-row">
           {renderSearchResults()}
-
-          {kits.length === 0 && <p>Nie znaleziono takiego zestawu</p>}
         </div>
       </div>
     </Layout>
@@ -120,12 +220,9 @@ export const getServerSideProps = async ({
   req,
   res,
   query,
-}: GetServerSidePropsContext): Promise<
-  GetServerSidePropsResult<Props & { kits: any[] }>
-> => {
+}: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> => {
   const searchText = query.text as unknown as string;
   const type = query.type === "user" ? "user" : "kit";
-
   const kitCaller = kitsRouter.createCaller({ prismaClient, req, res });
   const userCaller = usersRouter.createCaller({ prismaClient, req, res });
 
@@ -139,12 +236,12 @@ export const getServerSideProps = async ({
   //Set arrays and give them appropiate types
   const users = type === "user" ? (searched as _User[]) : [];
   const kits = type === "kit" ? (searched as _Kit[]) : [];
-
   return {
     props: {
-      users,
+      key: `${searchText} ${type}`,
+      _users: users,
       searchText,
-      kits,
+      _kits: kits,
       nickname: auth?.session?.user.nickname,
       type,
     },

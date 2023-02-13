@@ -2,7 +2,6 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { Context } from "./context";
 import superjson from "superjson";
 import { isUserLoggedIn } from "../services/auth.service";
-import { createHmac } from "crypto";
 // Avoid exporting the entire t-object
 // since it's not very descriptive.
 // For instance, the use of a t variable
