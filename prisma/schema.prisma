@@ -13,11 +13,14 @@ datasource db {
 model User {
   id String @default(uuid()) @unique @id
   email String @unique
+  nickname String @unique
   password String
-  nickname String
+
+  avatarSeed String?
 
   sessions Session[]
   kits Kit[]
+  progresses Progress[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -34,6 +37,13 @@ model Kit {
   data Json
 
   createdAt DateTime @default(now())
+}
+
+model Progress {
+  id String @default(uuid()) @id
+  user User @relation(fields: [createdBy],references: [id], onDelete: Cascade)
+  createdBy String
+  data Json
 }
 
 model Session {

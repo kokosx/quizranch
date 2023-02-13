@@ -1,30 +1,25 @@
 import { prismaClient } from "../server/prisma";
-import crypto, { createHmac } from "crypto";
-import { hash } from "bcrypt";
+import crypto from "crypto";
 import { GetServerSidePropsContext } from "next";
+import hash from "../server/utils/hash";
 
-const generateSessionId = (sessionId?: string) => {
-  const id = sessionId ?? crypto.randomBytes(32).toString("hex");
-
-  const hashed = crypto
-    //@ts-expect-error
-    .createHmac("sha512", process.env.SESSION_SECRET)
-    .update(id)
-    .digest("hex");
-  return { id, hashed };
-};
-
+//To be used in getServerSideProps
 export const isUserLoggedIn = async (req: GetServerSidePropsContext["req"]) => {
   const sessionId = req.cookies["sessionId"];
   if (!sessionId) {
     return null;
   }
-  const { hashed } = generateSessionId(sessionId);
+  const hashedSessionId = hash(sessionId);
   const session = await prismaClient.session.findUnique({
-    where: { id: hashed },
+    where: { id: hashedSessionId },
     include: {
       user: {
-        select: { _count: true, id: true, kits: { select: { id: true } } },
+        select: {
+          _count: true,
+          id: true,
+          kits: { select: { id: true } },
+          nickname: true,
+        },
       },
     },
   });
@@ -35,7 +30,7 @@ export const isUserLoggedIn = async (req: GetServerSidePropsContext["req"]) => {
   return { session, generateCSRF };
 };
 
-export const _generateCSRFToken = async (hashedSessionId: string) => {
+const _generateCSRFToken = async (hashedSessionId: string) => {
   const token = crypto.randomBytes(250).toString("hex");
 
   await prismaClient.csrfToken.deleteMany({

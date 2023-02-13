@@ -1,12 +1,15 @@
 import { TRPCError } from "@trpc/server";
 import { compare, hash } from "bcrypt";
-import { createHmac } from "crypto";
 import { z } from "zod";
 import { setSessionCookie } from "../../apiUtils/cookies";
 import { procedure, router } from "../trpc";
 import crypto from "crypto";
 import { deleteCookie } from "cookies-next";
 import omit from "object.omit";
+import _hash from "./../utils/hash";
+import { SESSION_ID_LENGTH } from "../../constants";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime";
+import { User } from "@prisma/client";
 
 export const authRouter = router({
   register: procedure
@@ -18,42 +21,78 @@ export const authRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
-      const hashedPassword = await hash(input.password, 12);
-      const sessionId = crypto.randomBytes(72).toString("hex");
+      //See if user with this email/username already exists:
 
-      const hashedSessionId = createHmac(
-        "SHA512",
-        //@ts-expect-error
-        process.env.SESSION_SECRET
-      )
-        .update(sessionId)
-        .digest("hex");
-      try {
-        const user = await ctx.prismaClient.user.create({
-          data: {
-            email: input.email,
-            nickname: input.nickname,
-            password: hashedPassword,
-          },
-        });
+      const userQuery = await ctx.prismaClient.user.findMany({
+        where: {
+          OR: [
+            { email: { contains: input.email, mode: "insensitive" } },
+            { nickname: { contains: input.nickname, mode: "insensitive" } },
+          ],
+        },
+      });
 
-        await ctx.prismaClient.session.create({
-          data: {
-            id: hashedSessionId,
-            userId: user.id,
-          },
+      let userExists = false;
+
+      //Check if nickname already exists:
+      for (let v of userQuery) {
+        const areTheSame = v.nickname.localeCompare(input.nickname, undefined, {
+          sensitivity: "base",
         });
-        setSessionCookie(sessionId, {
-          req: ctx.req,
-          res: ctx.res,
-        });
-        return { user: omit(user, "password") };
-      } catch (error) {
+        if (!areTheSame) {
+          userExists = true;
+          break;
+        }
+      }
+      if (userExists) {
         throw new TRPCError({
-          message: "User with this email already exists",
           code: "CONFLICT",
+          message: "Użytkownik z tą nazwą już istnieje",
         });
       }
+
+      //Check if email already exists:
+      for (let v of userQuery) {
+        const areTheSame = v.email.localeCompare(input.email, undefined, {
+          sensitivity: "base",
+        });
+        if (!areTheSame) {
+          userExists = true;
+          break;
+        }
+      }
+      if (userExists) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Użytkownik z tym mailem już istnieje",
+        });
+      }
+      //Creating new user:
+
+      const hashedPassword = await hash(input.password, 12);
+      const sessionId = crypto.randomBytes(SESSION_ID_LENGTH).toString("hex");
+
+      const hashedSessionId = _hash(sessionId);
+
+      const user = await ctx.prismaClient.user.create({
+        data: {
+          email: input.email,
+          nickname: input.nickname,
+          password: hashedPassword,
+        },
+      });
+
+      await ctx.prismaClient.session.create({
+        data: {
+          id: hashedSessionId,
+          userId: user.id,
+        },
+      });
+      setSessionCookie(sessionId, {
+        req: ctx.req,
+        res: ctx.res,
+      });
+      return { user: omit(user, "password") };
     }),
   login: procedure
     .input(
@@ -79,15 +118,10 @@ export const authRouter = router({
           message: "Wrong password",
         });
       }
-      const sessionId = crypto.randomBytes(72).toString("hex");
+      const sessionId = crypto.randomBytes(SESSION_ID_LENGTH).toString("hex");
 
-      const hashedSessionId = createHmac(
-        "SHA512",
-        //@ts-expect-error
-        process.env.SESSION_SECRET
-      )
-        .update(sessionId)
-        .digest("hex");
+      const hashedSessionId = _hash(sessionId);
+
       await ctx.prismaClient.session.create({
         data: {
           id: hashedSessionId,
@@ -110,15 +144,9 @@ export const authRouter = router({
     }
     //Delete cookie
 
-    const hashedCookie = createHmac(
-      "SHA512",
-      //@ts-expect-error
-      process.env.SESSION_SECRET
-    )
-      .update(existingCookie)
-      .digest("hex");
+    const hashedSessionId = _hash(existingCookie);
     ctx.prismaClient.session
-      .delete({ where: { id: hashedCookie } })
+      .delete({ where: { id: hashedSessionId } })
       .catch(() => null);
     deleteCookie("sessionId", { req: ctx.req, res: ctx.res });
     return { message: "Success" };

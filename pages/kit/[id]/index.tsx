@@ -7,19 +7,29 @@ import Layout from "../../../components/layout";
 import { KitData } from "../../../types";
 import { useState } from "react";
 import Link from "next/link";
+import {
+  DocumentIcon,
+  FolderIcon,
+  LearnIcon,
+} from "../../../components/KitEditorIcons";
+import { createAvatar } from "@dicebear/core";
+import { botttsNeutral } from "@dicebear/collection";
+import Image from "next/image";
+import Avatar from "../../../components/Avatar";
 
 type Props = {
-  isLoggedIn: boolean;
   kit: Kit & {
     data: KitData[];
     user: {
       nickname: string;
+      avatarSeed: string;
     };
   };
   isCreator: boolean;
+  nickname?: string;
 };
 
-const Kit = ({ isCreator, isLoggedIn, kit }: Props) => {
+const Kit = ({ isCreator, kit, nickname }: Props) => {
   const [index, setIndex] = useState(0);
   const [view, setView] = useState<"question" | "answer">("question");
 
@@ -40,48 +50,72 @@ const Kit = ({ isCreator, isLoggedIn, kit }: Props) => {
   };
 
   return (
-    <Layout user={isLoggedIn} title="Ucz się">
+    <Layout nickname={nickname} title="Ucz się">
       <div className="flex flex-col gap-y-4">
         <h2 className="text-4xl font-semibold text-secondary">{kit.name}</h2>
-
-        <div className="flex items-center justify-center w-full ">
-          <div
-            onClick={() => setView(view === "answer" ? "question" : "answer")}
-            className="container flex flex-col items-center justify-start p-2 border-2 rounded-md cursor-pointer h-96 gap-y-2 border-base-300 bg-base-200 md:w-10/12 lg:w-2/3"
-          >
-            <p>
-              {index + 1} / {kit.data.length}
-            </p>
-
-            <p className="flex items-center h-full text-2xl ">
-              {kit.data[index][view]}
-            </p>
-
-            <div className="flex gap-x-4">
-              <button
-                onClick={(e) => {
-                  previousQuestion();
-                  e.stopPropagation();
-                }}
-                className="btn"
-              >
-                {"<"}
+        <div className="flex flex-col items-center justify-center w-full h-full">
+          <div className="flex flex-col items-center justify-center w-full md:w-10/12 lg:w-2/3 gap-y-2 ">
+            <div className="flex items-center w-full justify-evenly md:justify-start gap-x-2">
+              <button className="gap-2 btn btn-accent">
+                <FolderIcon />
+                Fiszki
               </button>
-              <button
-                onClick={(e) => {
-                  nextQuestion();
-                  e.stopPropagation();
-                }}
-                className="btn"
-              >
-                {">"}
+              <button className="gap-2 btn btn-accent">
+                <LearnIcon />
+                Ucz się
               </button>
+              <button className="gap-2 btn btn-accent">
+                <DocumentIcon />
+                Test
+              </button>
+            </div>
+
+            <div className="divider"></div>
+
+            <div
+              onClick={() => setView(view === "answer" ? "question" : "answer")}
+              className="container flex flex-col items-center justify-start w-full p-2 border-2 rounded-md cursor-pointer h-96 gap-y-2 border-base-300 bg-base-200 "
+            >
+              <p>
+                {index + 1} / {kit.data.length}
+              </p>
+
+              <p className="flex items-center h-full text-2xl ">
+                {kit.data[index][view]}
+              </p>
+
+              <div className="flex gap-x-4">
+                <button
+                  onClick={(e) => {
+                    previousQuestion();
+                    e.stopPropagation();
+                  }}
+                  className="btn"
+                >
+                  {"<"}
+                </button>
+                <button
+                  onClick={(e) => {
+                    nextQuestion();
+                    e.stopPropagation();
+                  }}
+                  className="btn"
+                >
+                  {">"}
+                </button>
+              </div>
             </div>
           </div>
         </div>
 
         {kit.description ? <p>{kit.description}</p> : <p>Brak opisu</p>}
-        <p className="text-accent">Utworzone przez {kit.user.nickname}</p>
+        <div className="flex items-center gap-x-2">
+          <p className="text-accent">Utworzone przez {kit.user.nickname}</p>
+          <button className="p-2 btn btn-circle">
+            <Avatar data={kit.user} />
+          </button>
+        </div>
+
         {isCreator && (
           <div className="flex gap-x-2">
             <Link href={`/kit/${kit.id}/edit`} className="btn btn-secondary">
@@ -98,26 +132,33 @@ export default Kit;
 
 export const getServerSideProps = async (
   ctx: GetServerSidePropsContext
-): Promise<GetServerSidePropsResult<any>> => {
+): Promise<GetServerSidePropsResult<Props>> => {
   const id = ctx.params?.id as unknown as string | null;
   if (!id) {
     return { redirect: { permanent: false, destination: "/dashboard" } };
   }
 
-  const auth = await isUserLoggedIn(ctx.req);
   const caller = kitsRouter.createCaller({
     prismaClient,
     req: ctx.req,
     res: ctx.res,
   });
-  let isLoggedIn = false;
-  if (auth?.session?.user.id) {
-    isLoggedIn = true;
+  const [auth, kit] = await Promise.all([
+    isUserLoggedIn(ctx.req),
+    caller.getKitById({ kitId: id }),
+  ]);
+  /*const auth = await isUserLoggedIn(ctx.req);
+  const kit = await caller.getKitById({ kitId: id });*/
+  if (!kit) {
+    return { redirect: { destination: "/404/kit", permanent: false } };
   }
-  const kit = await caller.getKitById({ kitId: id });
 
   const isCreator = auth?.session?.user.id === kit.createdBy;
   return {
-    props: { isCreator, isLoggedIn, kit: JSON.parse(JSON.stringify(kit)) },
+    props: {
+      isCreator,
+      kit: JSON.parse(JSON.stringify(kit)),
+      nickname: auth?.session?.user.nickname,
+    },
   };
 };

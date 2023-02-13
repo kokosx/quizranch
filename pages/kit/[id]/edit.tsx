@@ -1,4 +1,4 @@
-import { GetServerSidePropsContext } from "next";
+import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import KitEditor from "../../../components/KitEditor";
 import Layout from "../../../components/layout";
 import { kitsRouter } from "../../../server/routers/kits";
@@ -7,15 +7,15 @@ import { prismaClient } from "../../../server/prisma";
 import { Kit } from "@prisma/client";
 import { KitData } from "../../../types";
 
-const Edit = ({
-  csrfToken,
-  kit,
-}: {
+type Props = {
   csrfToken: string;
   kit: Kit & { data: KitData[] };
-}) => {
+  nickname: string;
+};
+
+const Edit = ({ csrfToken, kit, nickname }: Props) => {
   return (
-    <Layout title="Edytuj zestaw" user={true}>
+    <Layout title="Edytuj zestaw" nickname={nickname}>
       <KitEditor csrfToken={csrfToken} initialData={kit} />
     </Layout>
   );
@@ -23,7 +23,9 @@ const Edit = ({
 
 export default Edit;
 
-export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
+export const getServerSideProps = async (
+  ctx: GetServerSidePropsContext
+): Promise<GetServerSidePropsResult<Props>> => {
   const auth = await isUserLoggedIn(ctx.req);
   if (!auth?.session) {
     return { redirect: { permanent: false, destination: "/" } };
@@ -43,8 +45,12 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     res: ctx.res,
   });
   const kit = await caller.getKitById({ kitId: id });
+  if (!kit) {
+    return { redirect: { destination: "/404/kit", permanent: false } };
+  }
   return {
     props: {
+      nickname: auth.session.user.nickname,
       kit: JSON.parse(JSON.stringify(kit)),
       csrfToken: await auth.generateCSRF(),
     },

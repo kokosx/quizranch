@@ -21,6 +21,7 @@ const KitEditor = ({
   const [description, setDescription] = useState(
     initialData?.description ?? ""
   );
+
   const [error, setError] = useState<false | string>(false);
   const [loading, setLoading] = useState(false);
   //TRPC Mutations
@@ -39,6 +40,18 @@ const KitEditor = ({
     }
     if (data.length < 2) {
       setError("Zestaw musi mieć przynjamniej 2 pytania");
+      return;
+    }
+    //Check if any answer or question is empty
+    let isEmpty = false;
+    for (const v of data) {
+      if (v.answer.length < 1 || v.question.length < 1) {
+        isEmpty = true;
+        break;
+      }
+    }
+    if (isEmpty) {
+      setError("Pytanie lub odpowiedź nie może być pusta");
       return;
     }
     setLoading(true);
@@ -95,7 +108,10 @@ const KitEditor = ({
   };
 
   const addNewItem = () => {
-    setData((prev) => [...prev, { answer: "", question: "" }]);
+    setData((prev) => [
+      ...prev,
+      { answer: "", question: "", id: crypto.randomUUID() },
+    ]);
   };
 
   const deleteItem = (index: number) => {

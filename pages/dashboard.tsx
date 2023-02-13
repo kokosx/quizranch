@@ -9,12 +9,14 @@ import { prismaClient } from "../server/prisma";
 import { kitsRouter } from "../server/routers/kits";
 import { isUserLoggedIn } from "../services/auth.service";
 
-const Dashboard = ({ kits }: { kits: Kit[] }) => {
+type Props = { kits: Kit[]; nickname: string };
+
+const Dashboard = ({ kits, nickname }: Props) => {
   const router = useRouter();
   const [error, setError] = useState<false | string>(false);
 
   return (
-    <Layout user title="Dashboard">
+    <Layout nickname={nickname} title="Dashboard">
       <div>
         <h3 className="text-4xl font-semibold text-secondary">Twoje zestawy</h3>
         <div className="flex flex-col flex-wrap justify-center gap-4 mt-4 lg:gap-8 md:justify-start md:flex-row">
@@ -65,23 +67,31 @@ const Dashboard = ({ kits }: { kits: Kit[] }) => {
 
 export default Dashboard;
 
-export const getServerSideProps = async (
-  ctx: GetServerSidePropsContext
-): Promise<GetServerSidePropsResult<any>> => {
-  const auth = await isUserLoggedIn(ctx.req);
+export const getServerSideProps = async ({
+  req,
+  res,
+}: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> => {
+  const auth = await isUserLoggedIn(req);
   if (!auth?.session) {
     return {
       redirect: { destination: "/login", permanent: false },
     };
   }
+
   const caller = kitsRouter.createCaller({
     prismaClient,
-    req: ctx.req,
-    res: ctx.res,
+    req,
+    res,
   });
 
   const kits = await caller.getUsersNotesByNewest({
     userId: auth.session.userId,
   });
-  return { props: { kits: JSON.parse(JSON.stringify(kits)) } };
+
+  return {
+    props: {
+      kits: JSON.parse(JSON.stringify(kits)),
+      nickname: auth.session.user.nickname,
+    },
+  };
 };

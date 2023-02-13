@@ -5,9 +5,14 @@ import Layout from "../components/layout";
 
 import { isUserLoggedIn } from "../services/auth.service";
 
-const Add = ({ csrfToken }: { csrfToken: string }) => {
+type Props = {
+  csrfToken: string;
+  nickname: string;
+};
+
+const Add = ({ csrfToken, nickname }: Props) => {
   return (
-    <Layout title="Dodaj nowy zestaw" user>
+    <Layout title="Dodaj nowy zestaw" nickname={nickname}>
       <KitEditor csrfToken={csrfToken} />
     </Layout>
   );
@@ -17,7 +22,7 @@ export default Add;
 
 export const getServerSideProps = async (
   ctx: GetServerSidePropsContext
-): Promise<GetServerSidePropsResult<{ csrfToken: string }>> => {
+): Promise<GetServerSidePropsResult<Props>> => {
   const auth = await isUserLoggedIn(ctx.req);
   if (!auth?.session) {
     return { redirect: { destination: "/", permanent: false } };
@@ -28,5 +33,5 @@ export const getServerSideProps = async (
   }
 
   const csrfToken = await auth.generateCSRF();
-  return { props: { csrfToken } };
+  return { props: { csrfToken, nickname: auth.session.user.nickname } };
 };

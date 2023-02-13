@@ -1,25 +1,48 @@
 import { TRPCError } from "@trpc/server";
-import { string, z } from "zod";
+import { z } from "zod";
+import { MAX_KIT_AMOUNT } from "../../constants";
 import { authorizedProcedure, procedure, router } from "../trpc";
 
+//Utils:
+const kitBelongsToUser = ({
+  usersKits,
+  userId,
+}: {
+  usersKits: { id: string }[];
+  userId: string;
+}): boolean => usersKits.filter((v) => v.id === userId).length !== 1;
+
+const errors = {
+  kitSchema: {
+    name: {
+      min: "Name is too short",
+    },
+    data: {
+      min: "There must be at least 2 inputs",
+    },
+  },
+};
+
+//
+
 const kitSchema = z.object({
-  name: z.string().min(3),
+  name: z.string().min(3, errors.kitSchema.name.min),
   description: z.string().default(""),
 
   data: z
     .object({
-      question: z.string(),
-      answer: z.string(),
+      question: z.string().min(1, "Question cannot be empty"),
+      answer: z.string().min(1, "Answer cannot be empty"),
     })
     .array()
-    .min(2),
+    .min(2, errors.kitSchema.data.min),
 });
 
 export const kitsRouter = router({
   addKit: authorizedProcedure
     .input(kitSchema)
     .mutation(async ({ input, ctx }) => {
-      if (ctx.session.user.kits.length >= 5) {
+      if (ctx.session.user.kits.length >= MAX_KIT_AMOUNT) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Over 5 kits" });
       }
       try {
@@ -44,6 +67,7 @@ export const kitsRouter = router({
     .query(async ({ input, ctx }) => {
       return await ctx.prismaClient.kit.findMany({
         where: { createdBy: input.userId },
+        include: { user: { select: { nickname: true, avatarSeed: true } } },
         orderBy: { createdAt: "desc" },
       });
     }),
@@ -52,7 +76,7 @@ export const kitsRouter = router({
     .query(async ({ input, ctx }) => {
       const kit = await ctx.prismaClient.kit.findUnique({
         where: { id: input.kitId },
-        include: { user: { select: { nickname: true } } },
+        include: { user: { select: { nickname: true, avatarSeed: true } } },
       });
 
       if (!kit) {
@@ -65,12 +89,16 @@ export const kitsRouter = router({
     .input(z.object({ kitId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       if (
-        ctx.session.user.kits.filter((v) => v.id === input.kitId).length !== 1
+        !kitBelongsToUser({
+          userId: ctx.session.userId,
+          usersKits: ctx.session.user.kits,
+        })
       ) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
       try {
         await ctx.prismaClient.kit.delete({ where: { id: input.kitId } });
+
         return { message: "success" };
       } catch (error) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Kit doesnt exist" });
@@ -82,7 +110,10 @@ export const kitsRouter = router({
     .mutation(async ({ input, ctx }) => {
       //Check if user user authorized to mutate:
       if (
-        ctx.session.user.kits.filter((v) => v.id === input.kitId).length !== 1
+        !kitBelongsToUser({
+          userId: ctx.session.userId,
+          usersKits: ctx.session.user.kits,
+        })
       ) {
         throw new TRPCError({ code: "UNAUTHORIZED" });
       }
@@ -99,6 +130,20 @@ export const kitsRouter = router({
       } catch (error) {
         throw new TRPCError({ code: "BAD_REQUEST" });
       }
+    }),
+  searchForKit: procedure
+    .input(z.object({ name: z.string() }))
+    .query(async ({ ctx, input }) => {
+      return await ctx.prismaClient.kit.findMany({
+        where: { name: { contains: input.name, mode: "insensitive" } },
+        take: 10,
+        select: {
+          id: true,
+          name: true,
+          description: true,
+          user: { select: { avatarSeed: true, nickname: true } },
+        },
+      });
     }),
 });
 
