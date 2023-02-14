@@ -2,7 +2,7 @@ import { Kit } from "@prisma/client";
 import { TRPCClientError } from "@trpc/client";
 
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { KitData } from "../types";
 
@@ -10,12 +10,11 @@ import { csrfHeader, trpc } from "../utils/trpc";
 import { serializeKitRouterError } from "../utils/zodErrors";
 
 const KitEditor = ({
-  csrfToken,
   initialData,
 }: {
-  csrfToken: string;
   initialData?: Kit & { data: KitData[] };
 }) => {
+  const csrfToken = trpc.auth.getCSRFToken.useQuery();
   const [data, setData] = useState<KitData[]>(initialData?.data ?? []);
   const [name, setName] = useState(initialData?.name ?? "");
   const [description, setDescription] = useState(
@@ -56,7 +55,7 @@ const KitEditor = ({
     }
     setLoading(true);
     //Set csrf
-    csrfHeader.value = csrfToken;
+    csrfHeader.value = csrfToken.data?.id;
     //Edit
     if (initialData) {
       try {
@@ -71,7 +70,7 @@ const KitEditor = ({
       } catch (error) {
         if (error instanceof TRPCClientError) {
           //If failed, generate new token from getServerSideProps
-          router.replace(router.asPath);
+          csrfToken.refetch();
           setError(serializeKitRouterError(error));
         }
       }
@@ -84,7 +83,7 @@ const KitEditor = ({
       } catch (error) {
         if (error instanceof TRPCClientError) {
           //If failed, generate new token from getServerSideProps
-          router.replace(router.asPath);
+          csrfToken.refetch();
           setError(serializeKitRouterError(error));
         }
       }
@@ -94,14 +93,14 @@ const KitEditor = ({
   };
 
   const handleDeleteKit = async () => {
-    csrfHeader.value = csrfToken;
+    csrfHeader.value = csrfToken.data?.id;
     try {
       //@ts-expect-error
       await deleteKit.mutateAsync({ kitId: initialData.id });
       router.push("/");
     } catch (error) {
       if (error instanceof TRPCClientError) {
-        router.replace(router.asPath);
+        csrfToken.refetch();
         setError(serializeKitRouterError(error));
       }
     }

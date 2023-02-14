@@ -28,25 +28,34 @@ const isLoggedIn = t.middleware(async ({ ctx, next }) => {
 });
 */
 
-const isAuthedToMutate = t.middleware(async ({ ctx, next }) => {
-  if (!ctx.req.headers["csrf-token"] || !ctx.req.cookies["sessionId"]) {
-    throw new TRPCError({ code: "FORBIDDEN" });
-  }
-
+const isAuthenticated = t.middleware(async ({ ctx, next }) => {
   const auth = await isUserLoggedIn(ctx.req);
   const session = auth?.session;
   if (!session) {
     throw new TRPCError({ code: "FORBIDDEN" });
   }
-  const token = ctx.req.headers["csrf-token"] as unknown as string;
-
-  const { count } = await ctx.prismaClient.csrfToken.deleteMany({
-    where: { id: token, sessionId: session.id },
-  });
-  if (count !== 1) {
-    throw new TRPCError({ code: "FORBIDDEN", message: "NO-CSRF" });
-  }
   return next({ ctx: { session } });
 });
 
-export const authorizedProcedure = procedure.use(isAuthedToMutate);
+type CSRFToken = string | undefined;
+
+const isAuthedToMutate = isAuthenticated.unstable_pipe(
+  async ({ ctx, next }) => {
+    const token = ctx.req.headers["csrf-token"] as CSRFToken;
+    if (!token) {
+      throw new TRPCError({ code: "FORBIDDEN" });
+    }
+    const { count } = await ctx.prismaClient.csrfToken.deleteMany({
+      where: { id: token, sessionId: ctx.session.id },
+    });
+    if (count !== 1) {
+      throw new TRPCError({ code: "FORBIDDEN", message: "NO-CSRF" });
+    }
+    return next();
+  }
+);
+
+//Procedure in which user has to be logged in
+export const authenticatedProcedure = procedure.use(isAuthenticated);
+//Procedure in which user has to be logged in and have valid csrf token
+export const authorizedProcedure = authenticatedProcedure.use(isAuthedToMutate);

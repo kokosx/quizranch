@@ -6,14 +6,13 @@ import Layout from "../components/layout";
 import { isUserLoggedIn } from "../services/auth.service";
 
 type Props = {
-  csrfToken: string;
   nickname: string;
 };
 
-const Add = ({ csrfToken, nickname }: Props) => {
+const Add = ({ nickname }: Props) => {
   return (
     <Layout title="Dodaj nowy zestaw" nickname={nickname}>
-      <KitEditor csrfToken={csrfToken} />
+      <KitEditor />
     </Layout>
   );
 };
@@ -32,6 +31,5 @@ export const getServerSideProps = async (
     return { redirect: { destination: "/dashboard", permanent: false } };
   }
 
-  const csrfToken = await auth.generateCSRF();
-  return { props: { csrfToken, nickname: auth.session.user.nickname } };
+  return { props: { nickname: auth.session.user.nickname } };
 };

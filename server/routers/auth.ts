@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { compare, hash } from "bcrypt";
 import { z } from "zod";
 import { setSessionCookie } from "../../apiUtils/cookies";
-import { procedure, router } from "../trpc";
+import { authenticatedProcedure, procedure, router } from "../trpc";
 import crypto from "crypto";
 import { deleteCookie } from "cookies-next";
 import omit from "object.omit";
@@ -148,5 +148,22 @@ export const authRouter = router({
       .catch(() => null);
     deleteCookie("sessionId", { req: ctx.req, res: ctx.res });
     return { message: "Success" };
+  }),
+  getCSRFToken: authenticatedProcedure.query(async ({ ctx }) => {
+    const tokenId = crypto.randomBytes(250).toString("hex");
+
+    const csrfToken = ctx.prismaClient.csrfToken.upsert({
+      create: {
+        id: tokenId,
+        sessionId: ctx.session.id,
+      },
+      update: {
+        id: tokenId,
+      },
+      where: {
+        sessionId: ctx.session.id,
+      },
+    });
+    return csrfToken;
   }),
 });

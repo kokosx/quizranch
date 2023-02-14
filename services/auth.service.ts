@@ -26,10 +26,9 @@ export const isUserLoggedIn = async (req: GetServerSidePropsContext["req"]) => {
   if (!session) {
     return { session: null, generateCSRF: null };
   }
-  const generateCSRF = async () => await _generateCSRFToken(session.id);
-  return { session, generateCSRF };
+  return { session };
 };
-
+/*
 const _generateCSRFToken = async (hashedSessionId: string) => {
   const token = crypto.randomBytes(250).toString("hex");
 
@@ -42,4 +41,4 @@ const _generateCSRFToken = async (hashedSessionId: string) => {
   });
 
   return token;
-};
+};*/

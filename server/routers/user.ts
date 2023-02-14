@@ -28,4 +28,13 @@ export const usersRouter = router({
       });
       return users;
     }),
+  getUser: procedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const user = await ctx.prismaClient.user.findUnique({
+        where: { id: input.id },
+        select: {},
+      });
+      return user;
+    }),
 });

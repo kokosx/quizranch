@@ -8,15 +8,14 @@ import { Kit } from "@prisma/client";
 import { KitData } from "../../../types";
 
 type Props = {
-  csrfToken: string;
   kit: Kit & { data: KitData[] };
   nickname: string;
 };
 
-const Edit = ({ csrfToken, kit, nickname }: Props) => {
+const Edit = ({ kit, nickname }: Props) => {
   return (
     <Layout title="Edytuj zestaw" nickname={nickname}>
-      <KitEditor csrfToken={csrfToken} initialData={kit} />
+      <KitEditor initialData={kit} />
     </Layout>
   );
 };
@@ -52,7 +51,6 @@ export const getServerSideProps = async (
     props: {
       nickname: auth.session.user.nickname,
       kit: JSON.parse(JSON.stringify(kit)),
-      csrfToken: await auth.generateCSRF(),
     },
   };
 };

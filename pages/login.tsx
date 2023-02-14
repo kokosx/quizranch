@@ -42,7 +42,7 @@ const Login = () => {
     );
     console.log(isEmailValid);
     if (!isEmailValid) {
-      setError("Email jest niepawidłowy");
+      setError("Email jest nieprawidłowy");
       return;
     }
     if (nickname.length < 3 && tab === "register") {
