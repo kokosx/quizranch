@@ -58,7 +58,7 @@ export const getServerSideProps = async ({
     };
   } catch (error) {
     return {
-      redirect: { destination: `/profile/404/`, permanent: false },
+      redirect: { destination: `/404/profile/`, permanent: false },
     };
   }
 };

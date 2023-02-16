@@ -4,19 +4,21 @@ import { z } from "zod";
 import { procedure, router } from "../trpc";
 
 export const usersRouter = router({
+  //TODO: Check if this works!
   getUserWithKits: procedure
     .input(z.object({ nickname: z.string() }))
     .query(async ({ ctx, input }) => {
-      const user = await ctx.prismaClient.user.findMany({
-        where: { nickname: { mode: "insensitive", contains: input.nickname } },
+      const user = await ctx.prismaClient.user.findUnique({
+        where: { nickname: input.nickname },
 
         include: { kits: { orderBy: { createdAt: "desc" } } },
       });
-      if (user.length < 1) {
-        throw new TRPCError({ code: "NOT_FOUND" });
+
+      if (!user) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
       }
 
-      return omit(user[0], ["email", "password"]);
+      return omit(user, ["email", "password"]);
     }),
   searchForUser: procedure
     .input(z.object({ nickname: z.string(), skip: z.number().default(0) }))

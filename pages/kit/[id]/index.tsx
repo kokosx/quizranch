@@ -133,22 +133,20 @@ export const getServerSideProps = async (
     req: ctx.req,
     res: ctx.res,
   });
-  const [auth, kit] = await Promise.all([
-    isUserLoggedIn(ctx.req),
-    caller.getKitById({ kitId: id }),
-  ]);
-  /*const auth = await isUserLoggedIn(ctx.req);
-  const kit = await caller.getKitById({ kitId: id });*/
-  if (!kit) {
+  try {
+    const [auth, kit] = await Promise.all([
+      isUserLoggedIn(ctx.req),
+      caller.getKitById({ kitId: id }),
+    ]);
+    const isCreator = auth?.session?.user.id === kit.createdBy;
+    return {
+      props: {
+        isCreator,
+        kit: JSON.parse(JSON.stringify(kit)),
+        nickname: auth?.session?.user.nickname,
+      },
+    };
+  } catch (error) {
     return { redirect: { destination: "/404/kit", permanent: false } };
   }
-
-  const isCreator = auth?.session?.user.id === kit.createdBy;
-  return {
-    props: {
-      isCreator,
-      kit: JSON.parse(JSON.stringify(kit)),
-      nickname: auth?.session?.user.nickname,
-    },
-  };
 };
