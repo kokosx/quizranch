@@ -1,6 +1,5 @@
 import { prismaClient } from "../server/prisma";
-import crypto from "crypto";
-import { GetServerSidePropsContext } from "next";
+import type { GetServerSidePropsContext } from "next";
 import hash from "../server/utils/hash";
 
 //To be used in getServerSideProps

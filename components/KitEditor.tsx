@@ -211,12 +211,12 @@ const KitEditor = ({
               >
                 <div
                   onClick={(e) => e.stopPropagation()}
-                  className="relative modal-box"
+                  className="relative flex flex-col gap-y-2 modal-box"
                 >
                   <h3 className="text-lg font-bold">
                     Czy na pewno chcesz usunąć zestaw?
                   </h3>
-                  <div className="flex justify-center gap-x-2">
+                  <div className="flex gap-x-2">
                     <button
                       onClick={() => setDeleteModal(false)}
                       className="btn btn-primary"
