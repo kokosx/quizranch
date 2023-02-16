@@ -1,5 +1,5 @@
 import Layout from "../../components/layout";
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { kitsRouter } from "../../server/routers/kits";
 import { prismaClient } from "../../server/prisma";
 import Avatar from "../../components/Avatar";
@@ -8,28 +8,14 @@ import { isUserLoggedIn } from "../../services/auth.service";
 import { usersRouter } from "../../server/routers/user";
 import { trpc } from "../../utils/trpc";
 import { useEffect, useState } from "react";
-
-type _Kit = {
-  user: {
-    nickname: string;
-    avatarSeed?: string | null;
-  };
-  id: string;
-  name: string;
-  description: string;
-};
-
-type _User = {
-  nickname: string;
-  avatarSeed?: string | null;
-};
+import type { KitOutput, UserOutput } from "../../server/routers/_app";
 
 type Props = {
   key: string;
   searchText: string;
   type: "kit" | "user";
-  _kits: _Kit[];
-  _users: _User[];
+  _kits: KitOutput["searchForKit"];
+  _users: UserOutput["searchForUser"];
   nickname?: string;
 };
 
@@ -234,8 +220,9 @@ export const getServerSideProps = async ({
       : kitCaller.searchForKit({ name: searchText }),
   ]);
   //Set arrays and give them appropiate types
-  const users = type === "user" ? (searched as _User[]) : [];
-  const kits = type === "kit" ? (searched as _Kit[]) : [];
+  const users =
+    type === "user" ? (searched as UserOutput["searchForUser"]) : [];
+  const kits = type === "kit" ? (searched as KitOutput["searchForKit"]) : [];
   return {
     props: {
       key: `${searchText} ${type}`,

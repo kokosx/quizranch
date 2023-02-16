@@ -1,14 +1,13 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import KitEditor from "../../../components/KitEditor";
 import Layout from "../../../components/layout";
 import { kitsRouter } from "../../../server/routers/kits";
 import { isUserLoggedIn } from "../../../services/auth.service";
 import { prismaClient } from "../../../server/prisma";
-import { Kit } from "@prisma/client";
-import { KitData } from "../../../types";
+import type { KitOutput } from "../../../server/routers/_app";
 
 type Props = {
-  kit: Kit & { data: KitData[] };
+  kit: KitOutput["getKitById"];
   nickname: string;
 };
 

@@ -1,14 +1,14 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import Layout from "../../components/layout";
 import { isUserLoggedIn } from "./../../services/auth.service";
 import { prismaClient } from "../../server/prisma";
 import { usersRouter } from "../../server/routers/user";
-import { Kit, User } from "@prisma/client";
 import Avatar from "../../components/Avatar";
+import type { UserOutput } from "../../server/routers/_app";
 
 type Props = {
   nickname?: string;
-  data: User & { kits: Kit[] };
+  data: UserOutput["getUserWithKits"];
 };
 
 const Profile = ({ data, nickname }: Props) => {
@@ -48,18 +48,17 @@ export const getServerSideProps = async ({
     req,
     res,
   });
-
-  const userWithKits = await caller.getUserWithKits({ nickname });
-  if (!userWithKits) {
+  try {
+    const userWithKits = await caller.getUserWithKits({ nickname });
+    return {
+      props: {
+        nickname: auth?.session?.user.nickname,
+        data: JSON.parse(JSON.stringify(userWithKits)),
+      },
+    };
+  } catch (error) {
     return {
       redirect: { destination: `/profile/404/`, permanent: false },
     };
   }
-
-  return {
-    props: {
-      nickname: auth?.session?.user.nickname,
-      data: JSON.parse(JSON.stringify(userWithKits)),
-    },
-  };
 };

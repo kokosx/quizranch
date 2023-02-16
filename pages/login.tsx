@@ -40,7 +40,6 @@ const Login = () => {
     const isEmailValid = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
       email
     );
-    console.log(isEmailValid);
     if (!isEmailValid) {
       setError("Email jest nieprawidłowy");
       return;

@@ -1,5 +1,4 @@
-import { Kit } from "@prisma/client";
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -7,9 +6,10 @@ import Layout from "../components/layout";
 
 import { prismaClient } from "../server/prisma";
 import { kitsRouter } from "../server/routers/kits";
+import type { KitOutput } from "../server/routers/_app";
 import { isUserLoggedIn } from "../services/auth.service";
 
-type Props = { kits: Kit[]; nickname: string };
+type Props = { kits: KitOutput["getUsersKitsByNewest"]; nickname: string };
 
 const Dashboard = ({ kits, nickname }: Props) => {
   const router = useRouter();
@@ -84,7 +84,7 @@ export const getServerSideProps = async ({
     res,
   });
 
-  const kits = await caller.getUsersNotesByNewest({
+  const kits = await caller.getUsersKitsByNewest({
     userId: auth.session.userId,
   });
 

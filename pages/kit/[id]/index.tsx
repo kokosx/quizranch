@@ -1,10 +1,9 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { kitsRouter } from "../../../server/routers/kits";
 import { isUserLoggedIn } from "../../../services/auth.service";
 import { prismaClient } from "../../../server/prisma";
 import { Kit } from "@prisma/client";
 import Layout from "../../../components/layout";
-import { KitData } from "../../../types";
 import { useState } from "react";
 import Link from "next/link";
 import {
@@ -12,19 +11,11 @@ import {
   FolderIcon,
   LearnIcon,
 } from "../../../components/KitEditorIcons";
-import { createAvatar } from "@dicebear/core";
-import { botttsNeutral } from "@dicebear/collection";
-import Image from "next/image";
 import Avatar from "../../../components/Avatar";
+import type { KitOutput } from "../../../server/routers/_app";
 
 type Props = {
-  kit: Kit & {
-    data: KitData[];
-    user: {
-      nickname: string;
-      avatarSeed: string;
-    };
-  };
+  kit: KitOutput["getKitById"];
   isCreator: boolean;
   nickname?: string;
 };

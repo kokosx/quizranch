@@ -1,4 +1,4 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import Layout from "../components/layout";
 import { prismaClient } from "../server/prisma";
 import { usersRouter } from "../server/routers/user";

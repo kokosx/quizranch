@@ -77,9 +77,9 @@ const KitEditor = ({
     } else {
       //Else create new
       try {
-        const res = await addKit.mutateAsync({ data, name, description });
+        const kit = await addKit.mutateAsync({ data, name, description });
 
-        router.push(`/kit/${res.note.id}`);
+        router.push(`/kit/${kit.id}`);
       } catch (error) {
         if (error instanceof TRPCClientError) {
           //If failed, generate new token from getServerSideProps

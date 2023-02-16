@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { MAX_KIT_AMOUNT } from "../../constants";
+import { KitData } from "../../types";
 import { authorizedProcedure, procedure, router } from "../trpc";
 
 //Utils:
@@ -46,7 +47,7 @@ export const kitsRouter = router({
         throw new TRPCError({ code: "FORBIDDEN", message: "Over 5 kits" });
       }
       try {
-        const note = await ctx.prismaClient.kit.create({
+        const kit = await ctx.prismaClient.kit.create({
           data: {
             name: input.name,
             description: input.description,
@@ -54,7 +55,7 @@ export const kitsRouter = router({
             data: input.data,
           },
         });
-        return { note };
+        return kit;
       } catch (error) {
         throw new TRPCError({
           code: "BAD_REQUEST",
@@ -62,7 +63,7 @@ export const kitsRouter = router({
         });
       }
     }),
-  getUsersNotesByNewest: procedure
+  getUsersKitsByNewest: procedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ input, ctx }) => {
       return await ctx.prismaClient.kit.findMany({
@@ -74,16 +75,16 @@ export const kitsRouter = router({
   getKitById: procedure
     .input(z.object({ kitId: z.string() }))
     .query(async ({ input, ctx }) => {
-      const kit = await ctx.prismaClient.kit.findUnique({
+      const kitWithUser = await ctx.prismaClient.kit.findUnique({
         where: { id: input.kitId },
         include: { user: { select: { nickname: true, avatarSeed: true } } },
       });
 
-      if (!kit) {
+      if (!kitWithUser) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Kit not found" });
       }
-
-      return kit;
+      type typeWithJSON = typeof kitWithUser & { data: KitData[] };
+      return kitWithUser as typeWithJSON;
     }),
   deleteKitById: authorizedProcedure
     .input(z.object({ kitId: z.string() }))

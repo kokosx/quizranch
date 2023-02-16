@@ -109,6 +109,7 @@ export const authRouter = router({
           message: "User not found",
         });
       }
+
       const isPasswordValid = await compare(input.password, foundUser.password);
       if (!isPasswordValid) {
         throw new TRPCError({

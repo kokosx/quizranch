@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import omit from "object.omit";
 import { z } from "zod";
 import { procedure, router } from "../trpc";
@@ -11,8 +12,8 @@ export const usersRouter = router({
 
         include: { kits: { orderBy: { createdAt: "desc" } } },
       });
-      if (!user) {
-        return null;
+      if (user.length < 1) {
+        throw new TRPCError({ code: "NOT_FOUND" });
       }
 
       return omit(user[0], ["email", "password"]);

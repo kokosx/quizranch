@@ -1,4 +1,4 @@
-import { GetServerSidePropsContext } from "next";
+import type { GetServerSidePropsContext } from "next";
 import { Education } from "../components/Education";
 import Layout from "../components/layout";
 import { isUserLoggedIn } from "../services/auth.service";
