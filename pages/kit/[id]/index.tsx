@@ -2,7 +2,6 @@ import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { kitsRouter } from "../../../server/routers/kits";
 import { isUserLoggedIn } from "../../../services/auth.service";
 import { prismaClient } from "../../../server/prisma";
-import { Kit } from "@prisma/client";
 import Layout from "../../../components/layout";
 import { useState } from "react";
 import Link from "next/link";
