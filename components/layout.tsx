@@ -110,6 +110,11 @@ const Layout = ({
                       Profil
                     </Link>
                   </li>
+                  <li>
+                    <Link href={`/settings`} className="justify-between">
+                      Ustawienia
+                    </Link>
+                  </li>
 
                   <li>
                     <button

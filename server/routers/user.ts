@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import omit from "object.omit";
 import { z } from "zod";
 import { procedure, router } from "../trpc";
+import { authorizedProcedure } from "../trpc";
 
 export const usersRouter = router({
   //TODO: Check if this works!
@@ -36,8 +37,24 @@ export const usersRouter = router({
     .query(async ({ ctx, input }) => {
       const user = await ctx.prismaClient.user.findUnique({
         where: { id: input.id },
-        select: {},
       });
+      if (!user) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
       return user;
+    }),
+  editUser: authorizedProcedure
+    .input(
+      z.object({
+        description: z.string().min(5).optional(),
+        avatarSeed: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prismaClient.user.update({
+        where: { id: ctx.session.userId },
+        data: { description: input.description, avatarSeed: input.avatarSeed },
+      });
+      return { avatarSeed: input.avatarSeed, description: input.description };
     }),
 });
