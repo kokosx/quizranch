@@ -38,7 +38,6 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
       setIndex(index - 1);
     }
   };
-
   return (
     <Layout nickname={nickname} title="Ucz się">
       <div className="flex flex-col gap-y-4">
@@ -99,12 +98,15 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
         </div>
 
         {kit.description ? <p>{kit.description}</p> : <p>Brak opisu</p>}
-        <div className="flex items-center gap-x-2">
+        <Link
+          href={`/profile/${nickname}`}
+          className="flex items-center p-2 border-2 rounded-md gap-x-2 border-secondary max-w-fit"
+        >
           <p className="text-accent">Utworzone przez {kit.user.nickname}</p>
           <button className="p-2 btn btn-circle">
             <Avatar data={kit.user} />
           </button>
-        </div>
+        </Link>
 
         {isCreator && (
           <div className="flex gap-x-2">

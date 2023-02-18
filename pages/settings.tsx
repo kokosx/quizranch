@@ -36,12 +36,12 @@ const Settings = ({ user }: Props) => {
     if (description.length === 0) {
       _description = undefined;
     }
-    const res = await userMutation.mutateAsync({
+    await userMutation.mutateAsync({
       avatarSeed: avatarSeed,
       description: _description,
     });
+    //TODO: Error handling
     csrfToken.refetch();
-    console.log(res);
   };
 
   return (
