@@ -22,8 +22,7 @@ const Settings = ({ user }: Props) => {
   const [error, setError] = useState<string | false>(false);
 
   const getNewAvatar = () => {
-    const random = Math.round(Math.random() * 10000000000);
-    setAvatarSeed(String(random));
+    setAvatarSeed(crypto.randomUUID());
   };
   const handleEdit = async () => {
     setError(false);

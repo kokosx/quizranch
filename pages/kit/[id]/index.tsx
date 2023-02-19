@@ -5,11 +5,7 @@ import { prismaClient } from "../../../server/prisma";
 import Layout from "../../../components/layout";
 import { useState } from "react";
 import Link from "next/link";
-import {
-  DocumentIcon,
-  FolderIcon,
-  LearnIcon,
-} from "../../../components/KitEditorIcons";
+import { DocumentIcon, LearnIcon } from "../../../components/KitEditorIcons";
 import Avatar from "../../../components/Avatar";
 import type { KitOutput } from "../../../server/routers/_app";
 
@@ -45,10 +41,6 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
         <div className="flex flex-col items-center justify-center w-full h-full">
           <div className="flex flex-col items-center justify-center w-full md:w-10/12 lg:w-2/3 gap-y-2 ">
             <div className="flex items-center w-full justify-evenly md:justify-start gap-x-2">
-              <button className="gap-2 btn btn-accent">
-                <FolderIcon />
-                Fiszki
-              </button>
               <button className="gap-2 btn btn-accent">
                 <LearnIcon />
                 Ucz się
@@ -98,15 +90,17 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
         </div>
 
         {kit.description ? <p>{kit.description}</p> : <p>Brak opisu</p>}
-        <Link
-          href={`/profile/${nickname}`}
-          className="flex items-center p-2 border-2 rounded-md gap-x-2 border-secondary max-w-fit"
-        >
-          <p className="text-accent">Utworzone przez {kit.user.nickname}</p>
+        <div className="flex items-center p-2 gap-x-2 border-secondary max-w-fit">
+          <Link
+            href={`/profile/${nickname}`}
+            className="text-accent link-hover"
+          >
+            Utworzone przez {kit.user.nickname}
+          </Link>
           <button className="p-2 btn btn-circle">
             <Avatar data={kit.user} />
           </button>
-        </Link>
+        </div>
 
         {isCreator && (
           <div className="flex gap-x-2">
