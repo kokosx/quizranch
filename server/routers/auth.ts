@@ -167,4 +167,7 @@ export const authRouter = router({
     });
     return csrfToken;
   }),
+  getSession: authenticatedProcedure.query(({ ctx }) => {
+    return ctx.session;
+  }),
 });

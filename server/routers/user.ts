@@ -1,6 +1,8 @@
+import { Kit, User } from "@prisma/client";
 import { TRPCError } from "@trpc/server";
 import omit from "object.omit";
 import { z } from "zod";
+import { KitData } from "../../types";
 import { procedure, router } from "../trpc";
 import { authorizedProcedure } from "../trpc";
 
@@ -11,7 +13,6 @@ export const usersRouter = router({
     .query(async ({ ctx, input }) => {
       const user = await ctx.prismaClient.user.findUnique({
         where: { nickname: input.nickname },
-
         include: { kits: { orderBy: { createdAt: "desc" } } },
       });
 
@@ -19,7 +20,14 @@ export const usersRouter = router({
         throw new TRPCError({ code: "NOT_FOUND", message: "User not found" });
       }
 
-      return omit(user, ["email", "password"]);
+      type TypeWithJSON = typeof user & {
+        kits: Kit &
+          {
+            data: KitData[];
+          }[];
+      };
+
+      return omit(user as TypeWithJSON, ["email", "password"]);
     }),
   searchForUser: procedure
     .input(z.object({ nickname: z.string(), skip: z.number().default(0) }))

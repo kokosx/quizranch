@@ -23,21 +23,7 @@ export const isUserLoggedIn = async (req: GetServerSidePropsContext["req"]) => {
     },
   });
   if (!session) {
-    return { session: null, generateCSRF: null };
+    return { session: null };
   }
   return { session };
 };
-/*
-const _generateCSRFToken = async (hashedSessionId: string) => {
-  const token = crypto.randomBytes(250).toString("hex");
-
-  await prismaClient.csrfToken.deleteMany({
-    where: { sessionId: hashedSessionId },
-  });
-
-  await prismaClient.csrfToken.create({
-    data: { id: token, sessionId: hashedSessionId },
-  });
-
-  return token;
-};*/

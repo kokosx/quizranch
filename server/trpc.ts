@@ -13,20 +13,6 @@ const t = initTRPC.context<Context>().create({
 // Base router and procedure helpers
 export const router = t.router;
 export const procedure = t.procedure;
-/*
-const isLoggedIn = t.middleware(async ({ ctx, next }) => {
-  if (!ctx.req.cookies["sessionId"]) {
-    throw new TRPCError({ code: "FORBIDDEN" });
-  }
-  const session = await isUserLoggedIn(ctx.req);
-  if (!session) {
-    console.log("no session");
-
-    throw new TRPCError({ code: "FORBIDDEN" });
-  }
-  return next({ ctx });
-});
-*/
 
 const isAuthenticated = t.middleware(async ({ ctx, next }) => {
   const auth = await isUserLoggedIn(ctx.req);
