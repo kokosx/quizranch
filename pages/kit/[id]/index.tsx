@@ -41,14 +41,18 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
         <div className="flex flex-col items-center justify-center w-full h-full">
           <div className="flex flex-col items-center justify-center w-full md:w-10/12 lg:w-2/3 gap-y-2 ">
             <div className="flex items-center w-full justify-evenly md:justify-start gap-x-2">
-              <button className="gap-2 btn btn-accent">
-                <LearnIcon />
-                Ucz się
-              </button>
-              <button className="gap-2 btn btn-accent">
-                <DocumentIcon />
-                Test
-              </button>
+              <Link href={`/kit/${kit.id}/learn`}>
+                <button className="gap-2 btn btn-accent">
+                  <LearnIcon />
+                  Ucz się
+                </button>
+              </Link>
+              <Link href={`/kit/${kit.id}/learn`}>
+                <button className="gap-2 btn btn-accent">
+                  <DocumentIcon />
+                  Test
+                </button>
+              </Link>
             </div>
 
             <div className="divider"></div>

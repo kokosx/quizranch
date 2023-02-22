@@ -38,12 +38,16 @@ model Kit {
   data Json
 
   createdAt DateTime @default(now())
+
+  progress Progress[]
 }
 
 model Progress {
   id String @default(uuid()) @id
   user User @relation(fields: [createdBy],references: [id], onDelete: Cascade)
   createdBy String
+  kitId String
+  kit Kit @relation(fields: [kitId],references: [id],onDelete: Cascade)
   data Json
 }
 
