@@ -3,7 +3,7 @@ import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { isUserLoggedIn } from "../../services/auth.service";
 
 type Props = {
-  nickname?: string;
+  nickname: string | null;
 };
 
 const ProfileNotFound = ({ nickname }: Props) => {
@@ -20,5 +20,5 @@ export const getServerSideProps = async ({
   req,
 }: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> => {
   const auth = await isUserLoggedIn(req);
-  return { props: { nickname: auth?.session?.user.nickname } };
+  return { props: { nickname: auth?.session?.user.nickname ?? null } };
 };

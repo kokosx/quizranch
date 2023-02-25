@@ -8,7 +8,7 @@ import type { UserOutput } from "../../server/routers/_app";
 import Link from "next/link";
 
 type Props = {
-  nickname?: string;
+  nickname: string | null;
   data: UserOutput["getUserWithKits"];
 };
 
@@ -84,7 +84,7 @@ export const getServerSideProps = async ({
     const userWithKits = await caller.getUserWithKits({ nickname });
     return {
       props: {
-        nickname: auth?.session?.user.nickname,
+        nickname: auth?.session?.user.nickname ?? null,
         data: JSON.parse(JSON.stringify(userWithKits)),
       },
     };

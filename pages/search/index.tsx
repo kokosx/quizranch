@@ -16,7 +16,7 @@ type Props = {
   type: "kit" | "user";
   _kits: KitOutput["searchForKit"];
   _users: UserOutput["searchForUser"];
-  nickname?: string;
+  nickname: string | null;
 };
 
 const SearchResults = ({
@@ -229,7 +229,7 @@ export const getServerSideProps = async ({
       _users: users,
       searchText,
       _kits: kits,
-      nickname: auth?.session?.user.nickname,
+      nickname: auth?.session?.user.nickname ?? null,
       type,
     },
   };

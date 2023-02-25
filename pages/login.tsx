@@ -65,7 +65,7 @@ const Login = () => {
   };
 
   return (
-    <Layout title="Zaloguj się">
+    <Layout nickname={null} title="Zaloguj się">
       <div className="flex flex-wrap items-center px-5 mx-auto md:py-24">
         <div className="pr-0 lg:w-3/5 md:w-1/2 md:pr-16 lg:pr-0">
           <p className="mt-4 leading-relaxed">

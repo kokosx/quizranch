@@ -12,7 +12,7 @@ import type { KitOutput } from "../../../server/routers/_app";
 type Props = {
   kit: KitOutput["getKitById"];
   isCreator: boolean;
-  nickname?: string;
+  nickname: string | null;
 };
 
 const Kit = ({ isCreator, kit, nickname }: Props) => {
@@ -143,7 +143,7 @@ export const getServerSideProps = async (
       props: {
         isCreator,
         kit: JSON.parse(JSON.stringify(kit)),
-        nickname: auth?.session?.user.nickname,
+        nickname: auth?.session?.user.nickname ?? null,
       },
     };
   } catch (error) {

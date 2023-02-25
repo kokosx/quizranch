@@ -5,7 +5,7 @@ import { isUserLoggedIn } from "../services/auth.service";
 
 const Login = () => {
   return (
-    <Layout title="Strona główna">
+    <Layout nickname={null} title="Strona główna">
       <div className="flex flex-col items-center w-full h-full">
         <Education />
       </div>

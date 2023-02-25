@@ -11,7 +11,7 @@ const Layout = ({
   initialSearchText,
 }: {
   children: ReactNode;
-  nickname?: string;
+  nickname: string | null;
   title: string;
   initialSearchText?: string;
 }) => {
