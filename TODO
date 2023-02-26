@@ -1,1 +1,3 @@
 TODO: Add max character constraint, improve ui on large amounts of characters
+TODO: Create abstraction for SSR
+TODO: Fix redirecting when not authed (with referrer)

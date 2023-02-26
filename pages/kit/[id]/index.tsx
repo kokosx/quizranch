@@ -41,18 +41,34 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
         <div className="flex flex-col items-center justify-center w-full h-full">
           <div className="flex flex-col items-center justify-center w-full md:w-10/12 lg:w-2/3 gap-y-2 ">
             <div className="flex items-center w-full justify-evenly md:justify-start gap-x-2">
-              <Link href={`/kit/${kit.id}/learn`}>
-                <button className="gap-2 btn btn-accent">
-                  <LearnIcon />
-                  Ucz się
+              <span
+                className={`${!nickname && "tooltip"}`}
+                data-tip={"Tylko dla zalogowanych"}
+              >
+                <button disabled={!nickname} className="btn btn-accent">
+                  <Link
+                    className="flex items-center gap-2"
+                    href={`/kit/${kit.id}/learn`}
+                  >
+                    Ucz się
+                    <LearnIcon />
+                  </Link>
                 </button>
-              </Link>
-              <Link href={`/kit/${kit.id}/learn`}>
-                <button className="gap-2 btn btn-accent">
-                  <DocumentIcon />
-                  Test
+              </span>
+              <span
+                className={`${!nickname && "tooltip"}`}
+                data-tip={"Tylko dla zalogowanych"}
+              >
+                <button disabled={!nickname} className="btn btn-accent">
+                  <Link
+                    className="flex items-center gap-2"
+                    href={`/kit/${kit.id}/exam`}
+                  >
+                    <DocumentIcon />
+                    Test
+                  </Link>
                 </button>
-              </Link>
+              </span>
             </div>
 
             <div className="divider"></div>
