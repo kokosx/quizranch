@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { MAX_KIT_AMOUNT } from "../../constants";
+import { CHARACTER_LIMIT, MAX_KIT_AMOUNT } from "../../constants";
 import { KitData } from "../../types";
 import { authorizedProcedure, procedure, router } from "../trpc";
 
@@ -32,8 +32,11 @@ const kitSchema = z.object({
 
   data: z
     .object({
-      question: z.string().min(1, "Question cannot be empty"),
-      answer: z.string().min(1, "Answer cannot be empty"),
+      question: z
+        .string()
+        .min(1, "Question cannot be empty")
+        .max(CHARACTER_LIMIT),
+      answer: z.string().min(1, "Answer cannot be empty").max(CHARACTER_LIMIT),
     })
     .array()
     .min(2, errors.kitSchema.data.min),

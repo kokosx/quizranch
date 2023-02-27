@@ -3,6 +3,7 @@ import { TRPCClientError } from "@trpc/client";
 
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { CHARACTER_LIMIT } from "../constants";
 
 import { KitData } from "../types";
 
@@ -41,6 +42,7 @@ const KitEditor = ({
       setError("Zestaw musi mieć przynjamniej 2 pytania");
       return;
     }
+
     //Check if any answer or question is empty
     let isEmpty = false;
     for (const v of data) {
@@ -53,6 +55,23 @@ const KitEditor = ({
       setError("Pytanie lub odpowiedź nie może być pusta");
       return;
     }
+
+    let isTooManyChars = false;
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].question.length > CHARACTER_LIMIT) {
+        setError(`Pytanie nr ${i + 1} przekroczyło ${CHARACTER_LIMIT} słow. `);
+        isTooManyChars = true;
+        return;
+      }
+      if (data[i].answer.length > CHARACTER_LIMIT) {
+        setError(
+          `Odpowiedz nr ${i + 1} przekroczyło ${CHARACTER_LIMIT} słow. `
+        );
+        isTooManyChars = true;
+        return;
+      }
+    }
+
     setLoading(true);
     //Set csrf
     csrfHeader.value = csrfToken.data?.id;
