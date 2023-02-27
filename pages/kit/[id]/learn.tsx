@@ -1,7 +1,7 @@
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import Layout from "../../../components/layout";
 import { prismaClient } from "../../../server/prisma";
-import { kitsRouter } from "../../../server/routers/kits";
+import { kitsRouter } from "../../../server/routers/kits.router";
 import { KitOutput } from "../../../server/routers/_app";
 import { isUserLoggedIn } from "../../../services/auth.service";
 

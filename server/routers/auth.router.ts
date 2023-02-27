@@ -6,7 +6,7 @@ import { authenticatedProcedure, procedure, router } from "../trpc";
 import crypto from "crypto";
 import { deleteCookie } from "cookies-next";
 import omit from "object.omit";
-import _hash from "./../utils/hash";
+import _hash from "../utils/hash";
 import { SESSION_ID_LENGTH } from "../../constants";
 
 export const authRouter = router({

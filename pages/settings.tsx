@@ -3,7 +3,7 @@ import { useState } from "react";
 import Avatar from "../components/Avatar";
 import Layout from "../components/layout";
 import { prismaClient } from "../server/prisma";
-import { usersRouter } from "../server/routers/user";
+import { usersRouter } from "../server/routers/user.router";
 import { UserOutput } from "../server/routers/_app";
 import { isUserLoggedIn } from "../services/auth.service";
 import { csrfHeader, trpc } from "../utils/trpc";

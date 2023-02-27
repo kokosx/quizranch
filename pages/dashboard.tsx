@@ -5,7 +5,7 @@ import { useState } from "react";
 import Layout from "../components/layout";
 
 import { prismaClient } from "../server/prisma";
-import { kitsRouter } from "../server/routers/kits";
+import { kitsRouter } from "../server/routers/kits.router";
 import type { KitOutput } from "../server/routers/_app";
 import { isUserLoggedIn } from "../services/auth.service";
 

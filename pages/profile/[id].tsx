@@ -2,7 +2,7 @@ import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import Layout from "../../components/layout";
 import { isUserLoggedIn } from "./../../services/auth.service";
 import { prismaClient } from "../../server/prisma";
-import { usersRouter } from "../../server/routers/user";
+import { usersRouter } from "../../server/routers/user.router";
 import Avatar from "../../components/Avatar";
 import type { UserOutput } from "../../server/routers/_app";
 import Link from "next/link";

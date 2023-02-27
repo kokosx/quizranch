@@ -1,8 +1,8 @@
 import { inferRouterOutputs } from "@trpc/server";
 import { router } from "../trpc";
-import { authRouter } from "./auth";
-import { kitsRouter } from "./kits";
-import { usersRouter } from "./user";
+import { authRouter } from "./auth.router";
+import { kitsRouter } from "./kits.router";
+import { usersRouter } from "./user.router";
 
 export const appRouter = router({
   auth: authRouter,

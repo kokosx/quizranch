@@ -1,11 +1,11 @@
 import Layout from "../../components/layout";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
-import { kitsRouter } from "../../server/routers/kits";
+import { kitsRouter } from "../../server/routers/kits.router";
 import { prismaClient } from "../../server/prisma";
 import Avatar from "../../components/Avatar";
 import Link from "next/link";
 import { isUserLoggedIn } from "../../services/auth.service";
-import { usersRouter } from "../../server/routers/user";
+import { usersRouter } from "../../server/routers/user.router";
 import { trpc } from "../../utils/trpc";
 import { useEffect, useState } from "react";
 import type { KitOutput, UserOutput } from "../../server/routers/_app";
