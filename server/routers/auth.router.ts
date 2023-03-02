@@ -74,7 +74,7 @@ export const authRouter = router({
 
       const user = await ctx.prismaClient.user.create({
         data: {
-          email: input.email,
+          email: input.email.toLowerCase(),
           nickname: input.nickname,
           password: hashedPassword,
         },
@@ -101,7 +101,7 @@ export const authRouter = router({
     )
     .mutation(async ({ input, ctx }) => {
       const foundUser = await ctx.prismaClient.user.findUnique({
-        where: { email: input.email },
+        where: { email: input.email.toLowerCase() },
       });
       if (!foundUser) {
         throw new TRPCError({
