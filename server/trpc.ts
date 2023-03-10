@@ -28,6 +28,7 @@ type CSRFToken = string | undefined;
 const isAuthedToMutate = isAuthenticated.unstable_pipe(
   async ({ ctx, next }) => {
     const token = ctx.req.headers["csrf-token"] as CSRFToken;
+
     if (!token) {
       throw new TRPCError({ code: "FORBIDDEN" });
     }

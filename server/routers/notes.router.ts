@@ -15,7 +15,7 @@ export const noteBelongsToUser = ({
 }: {
   usersNotes: { id: string }[];
   noteId: string;
-}): boolean => usersNotes.filter((v) => v.id === noteId).length !== 1;
+}): boolean => usersNotes.filter((v) => v.id === noteId).length === 1;
 
 export const noteVisibility = z.enum(["PUBLIC", "PRIVATE"]);
 export type NoteVisibility = TypeOf<typeof noteVisibility>;

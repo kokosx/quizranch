@@ -48,6 +48,7 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
   const csrfToken = trpc.auth.getCSRFToken.useQuery(undefined, {
     enabled: canEdit,
   });
+
   const updateNote = trpc.note.updateNote.useMutation();
   const addNote = trpc.note.addNote.useMutation();
   const [error, setError] = useState<string | undefined>();
@@ -95,6 +96,7 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     csrfHeader.value = csrfToken?.data?.id;
+
     //Handle adding new note
     if (!initialNote && userId && canEdit) {
       try {
@@ -111,7 +113,7 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
       }
     }
     //Handle editing
-    if (userId && canEdit && initialNote) {
+    else if (userId && canEdit && initialNote) {
       try {
         const res = await updateNote.mutateAsync({
           noteId: initialNote.id,
@@ -168,7 +170,11 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
             >
               Zapisz
             </button>
-            {initialNote && <button className="btn btn-error">Usuń</button>}
+            {initialNote && (
+              <button type="button" className="btn btn-error">
+                Usuń
+              </button>
+            )}
           </>
         )}
       </form>

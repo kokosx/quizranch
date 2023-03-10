@@ -21,7 +21,7 @@ export const kitBelongsToUser = ({
 }: {
   usersKits: { id: string }[];
   kitId: string;
-}): boolean => usersKits.filter((v) => v.id === kitId).length !== 1;
+}): boolean => usersKits.filter((v) => v.id === kitId).length === 1;
 
 const errors = {
   kitSchema: {

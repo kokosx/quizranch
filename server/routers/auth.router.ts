@@ -153,7 +153,7 @@ export const authRouter = router({
   getCSRFToken: authenticatedProcedure.query(async ({ ctx }) => {
     const tokenId = crypto.randomBytes(250).toString("hex");
 
-    const csrfToken = ctx.prismaClient.csrfToken.upsert({
+    const csrfToken = await ctx.prismaClient.csrfToken.upsert({
       create: {
         id: tokenId,
         sessionId: ctx.session.id,
@@ -165,9 +165,7 @@ export const authRouter = router({
         sessionId: ctx.session.id,
       },
     });
+
     return csrfToken;
-  }),
-  getSession: authenticatedProcedure.query(({ ctx }) => {
-    return ctx.session;
   }),
 });
