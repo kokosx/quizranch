@@ -51,6 +51,7 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
 
   const updateNote = trpc.note.updateNote.useMutation();
   const addNote = trpc.note.addNote.useMutation();
+  const deleteNote = trpc.note.deleteNote.useMutation();
   const [error, setError] = useState<string | undefined>();
   const router = useRouter();
   const [canSave, setCanSave] = useState(false);
@@ -129,6 +130,16 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      csrfHeader.value = csrfToken.data?.id;
+      await deleteNote.mutateAsync({ noteId: initialNote!.id });
+      router.push("/dashboard");
+    } catch (error) {
+      setError("Wystąpił błąd");
+    }
+  };
+
   return (
     <div className="flex flex-col w-full h-full gap-y-2">
       <form onSubmit={handleSubmit} className="flex items-center gap-x-4 ">
@@ -165,13 +176,28 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
             />
 
             <button
-              disabled={addNote.isLoading || !canSave || updateNote.isLoading}
+              disabled={
+                addNote.isLoading ||
+                !canSave ||
+                updateNote.isLoading ||
+                deleteNote.isLoading
+              }
               className="btn btn-success"
             >
               Zapisz
             </button>
             {initialNote && (
-              <button type="button" className="btn btn-error">
+              <button
+                onClick={handleDelete}
+                disabled={
+                  addNote.isLoading ||
+                  !canSave ||
+                  updateNote.isLoading ||
+                  deleteNote.isLoading
+                }
+                type="button"
+                className="btn btn-error"
+              >
                 Usuń
               </button>
             )}
