@@ -1,8 +1,10 @@
 import { prismaClient } from "../server/prisma";
 import type { GetServerSidePropsContext } from "next";
 import hash from "../server/utils/hash";
+import { Session, User } from "@prisma/client";
 
 //To be used in getServerSideProps
+
 export const isUserLoggedIn = async (req: GetServerSidePropsContext["req"]) => {
   const sessionId = req.cookies["sessionId"];
   if (!sessionId) {
@@ -18,6 +20,7 @@ export const isUserLoggedIn = async (req: GetServerSidePropsContext["req"]) => {
           id: true,
           kits: { select: { id: true } },
           nickname: true,
+          notes: { select: { id: true } },
         },
       },
     },

@@ -8,14 +8,22 @@ import { isUserLoggedIn } from "../../services/auth.service";
 import { usersRouter } from "../../server/routers/user.router";
 import { trpc } from "../../utils/trpc";
 import { useEffect, useState } from "react";
-import type { KitOutput, UserOutput } from "../../server/routers/_app";
+import type {
+  KitOutput,
+  NoteOutput,
+  UserOutput,
+} from "../../server/routers/_app";
+import { notesRouter } from "../../server/routers/notes.router";
+
+type QueryType = "kit" | "user" | "note";
 
 type Props = {
   key: string;
   searchText: string;
-  type: "kit" | "user";
+  type: QueryType;
   _kits: KitOutput["searchForKit"];
   _users: UserOutput["searchForUser"];
+  _notes: NoteOutput["searchForNote"];
   nickname: string | null;
 };
 
@@ -25,13 +33,17 @@ const SearchResults = ({
   nickname,
   type,
   _users,
+  _notes,
 }: Props) => {
   const [kits, setKits] = useState(_kits);
   const [users, setUsers] = useState(_users);
+  const [notes, setNotes] = useState(_notes);
   const [kitsSkipped, setKitsSkipped] = useState(10);
   const [usersSkipped, setUsersSkipped] = useState(10);
+  const [notesSkipped, setNotesSkipped] = useState(10);
   const [isMoreUsers, setIsMoreUsers] = useState(users.length === 10);
   const [isMoreKits, setIsMoreKits] = useState(kits.length === 10);
+  const [isMoreNotes, setIsMoreNotes] = useState(notes.length === 10);
 
   const moreKits = trpc.kit.searchForKit.useQuery(
     { name: searchText, skip: kitsSkipped },
@@ -39,6 +51,10 @@ const SearchResults = ({
   );
   const moreUsers = trpc.user.searchForUser.useQuery(
     { nickname: searchText, skip: usersSkipped },
+    { enabled: false }
+  );
+  const moreNotes = trpc.note.searchForNote.useQuery(
+    { text: searchText, skip: notesSkipped },
     { enabled: false }
   );
 
@@ -53,6 +69,16 @@ const SearchResults = ({
         setIsMoreUsers(false);
       }
       setUsers(toSet);
+    }
+    if (moreNotes.fetchStatus === "idle" && moreNotes.data && isMoreNotes) {
+      const prev = [...notes];
+      const toSet = prev.concat(moreNotes.data);
+      setNotesSkipped(notesSkipped + moreNotes.data.length);
+
+      if (moreNotes.data.length < 10) {
+        setIsMoreNotes(false);
+      }
+      setNotes(toSet);
     }
     if (moreKits.fetchStatus === "idle" && moreKits.data && isMoreKits) {
       const prev = [...kits];
@@ -76,6 +102,11 @@ const SearchResults = ({
     moreUsers.data,
     isMoreUsers,
     isMoreKits,
+    isMoreNotes,
+    moreNotes.data,
+    moreNotes.fetchStatus,
+    notes,
+    notesSkipped,
   ]);
 
   const loadMore = (what: typeof type) => {
@@ -115,6 +146,46 @@ const SearchResults = ({
                 </div>
                 <div className="flex items-end justify-end w-full h-full ">
                   <Link href={`/kit/${v.id}`}>
+                    <button className="btn btn-secondary">Przejdź</button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          ))}
+          {isMoreKits && (
+            <button
+              onClick={() => loadMore("kit")}
+              className={`flex items-center justify-center p-2 text-4xl font-semibold rounded-md cursor-pointer h-36 w-72 md:w-96 btn ${
+                moreKits.isFetching && "loading"
+              }`}
+            >
+              Pokaż więcej
+            </button>
+          )}
+        </>
+      );
+    }
+    if (type === "note") {
+      return (
+        <>
+          {notes.map((v) => (
+            <div key={v.id}>
+              <div className="flex p-2 rounded-md h-36 w-72 md:w-96 bg-neutral">
+                <div className="flex flex-col justify-between min-w-max ">
+                  <h5 className="p-2 text-2xl font-semibold">{v.name}</h5>
+                  <Link href={`/profile/${v.user.id}`}>
+                    <div className="flex items-center w-full p-2 border-2 border-transparent rounded-md gap-x-2 hover:border-accent">
+                      <span>
+                        {v.user.nickname.substring(0, 10)}
+                        {v.user.nickname.length >= 10 && "..."}
+                      </span>
+
+                      <Avatar data={v.user} />
+                    </div>
+                  </Link>
+                </div>
+                <div className="flex items-end justify-end w-full h-full ">
+                  <Link href={`/note/${v.id}`}>
                     <button className="btn btn-secondary">Przejdź</button>
                   </Link>
                 </div>
@@ -191,6 +262,12 @@ const SearchResults = ({
           >
             Użytkownicy
           </Link>
+          <Link
+            className={`btn  ${type === "note" && "btn-active"} `}
+            href={`/search?text=${searchText}&type=note`}
+          >
+            Notatki
+          </Link>
         </div>
         <div className="flex flex-col flex-wrap justify-center gap-4 mt-4 lg:gap-8 md:justify-start md:flex-row">
           {renderSearchResults()}
@@ -208,27 +285,36 @@ export const getServerSideProps = async ({
   query,
 }: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> => {
   const searchText = query.text as unknown as string;
-  const type = query.type === "user" ? "user" : "kit";
+  let type: QueryType = (query.type as unknown as QueryType) ?? "kit";
+  if (type !== "note" && type !== "kit" && type !== "user") {
+    type = "kit";
+  }
   const kitCaller = kitsRouter.createCaller({ prismaClient, req, res });
   const userCaller = usersRouter.createCaller({ prismaClient, req, res });
+  const noteCaller = notesRouter.createCaller({ prismaClient, req, res });
+  const auth = await isUserLoggedIn(req);
 
-  const [auth, searched] = await Promise.all([
-    isUserLoggedIn(req),
-    //Use appropiate caller
-    type === "user"
-      ? userCaller.searchForUser({ nickname: searchText })
-      : kitCaller.searchForKit({ name: searchText }),
-  ]);
-  //Set arrays and give them appropiate types
-  const users =
-    type === "user" ? (searched as UserOutput["searchForUser"]) : [];
-  const kits = type === "kit" ? (searched as KitOutput["searchForKit"]) : [];
+  let kits: KitOutput["searchForKit"] = [];
+  let notes: NoteOutput["searchForNote"] = [];
+  let users: UserOutput["searchForUser"] = [];
+
+  if (type === "kit") {
+    kits = await kitCaller.searchForKit({ name: searchText });
+  }
+  if (type === "note") {
+    notes = await noteCaller.searchForNote({ text: searchText });
+  }
+  if (type === "user") {
+    users = await userCaller.searchForUser({ nickname: searchText });
+  }
+
   return {
     props: {
       key: `${searchText} ${type}`,
       _users: users,
       searchText,
       _kits: kits,
+      _notes: notes,
       nickname: auth?.session?.user.nickname ?? null,
       type,
     },

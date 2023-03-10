@@ -1,13 +1,16 @@
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import KitEditor from "../../../components/KitEditor";
 import Layout from "../../../components/layout";
-import { kitsRouter } from "../../../server/routers/kits.router";
+
 import { isUserLoggedIn } from "../../../services/auth.service";
 import { prismaClient } from "../../../server/prisma";
-import type { KitOutput } from "../../../server/routers/_app";
+
+import type { Kit, KitQuestion } from "@prisma/client";
 
 type Props = {
-  kit: KitOutput["getKitById"];
+  kit: Kit & {
+    questions: KitQuestion[];
+  };
   nickname: string;
 };
 
@@ -33,23 +36,22 @@ export const getServerSideProps = async (
     return { redirect: { permanent: false, destination: "/dashboard" } };
   }
   //If user isnt creator, redirect:
-  if (auth.session.user.kits.filter((v) => v.id === id).length !== 1) {
-    console.log(auth.session.user.kits.map((v) => v.id === id));
-    return { redirect: { permanent: false, destination: `/kit/${id}` } };
-  }
-  const caller = kitsRouter.createCaller({
-    prismaClient,
-    req: ctx.req,
-    res: ctx.res,
+
+  const kit = await prismaClient.kit.findUnique({
+    where: { id },
+    include: { questions: true },
   });
-  const kit = await caller.getKitById({ kitId: id });
+
   if (!kit) {
-    return { redirect: { destination: "/404/kit", permanent: false } };
+    return { redirect: { destination: "/not-found", permanent: false } };
+  }
+  if (kit.createdBy !== auth.session.userId) {
+    return { redirect: { permanent: false, destination: `/kit/${id}` } };
   }
   return {
     props: {
       nickname: auth.session.user.nickname,
-      kit: JSON.parse(JSON.stringify(kit)),
+      kit,
     },
   };
 };

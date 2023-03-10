@@ -1,4 +1,5 @@
 const withPWA = require("next-pwa")({ dest: "public" });
+const { withSuperjson } = require("next-superjson");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -6,4 +7,5 @@ const nextConfig = {
   swcMinify: true,
 };
 
-module.exports = withPWA(nextConfig);
+const configWithPwa = withPWA(nextConfig);
+module.exports = withSuperjson()(configWithPwa);

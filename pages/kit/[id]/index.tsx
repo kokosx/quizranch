@@ -1,5 +1,4 @@
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
-import { kitsRouter } from "../../../server/routers/kits.router";
 import { isUserLoggedIn } from "../../../services/auth.service";
 import { prismaClient } from "../../../server/prisma";
 import Layout from "../../../components/layout";
@@ -7,10 +6,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { DocumentIcon, LearnIcon } from "../../../components/KitEditorIcons";
 import Avatar from "../../../components/Avatar";
-import type { KitOutput } from "../../../server/routers/_app";
+
+import type { Kit, KitQuestion, User } from "@prisma/client";
 
 type Props = {
-  kit: KitOutput["getKitById"];
+  kit: Kit & { questions: KitQuestion[] } & {
+    user: Pick<User, "avatarSeed" | "id" | "nickname">;
+  };
   isCreator: boolean;
   nickname: string | null;
 };
@@ -20,7 +22,7 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
   const [view, setView] = useState<"question" | "answer">("question");
 
   const nextQuestion = () => {
-    if (index + 1 === kit.data.length) {
+    if (index + 1 === kit.questions.length) {
       setIndex(0);
     } else {
       setIndex(index + 1);
@@ -29,7 +31,7 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
 
   const previousQuestion = () => {
     if (index === 0) {
-      setIndex(kit.data.length - 1);
+      setIndex(kit.questions.length - 1);
     } else {
       setIndex(index - 1);
     }
@@ -45,29 +47,25 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
                 className={`${!nickname && "tooltip"}`}
                 data-tip={"Tylko dla zalogowanych"}
               >
-                <button disabled={!nickname} className="btn btn-accent">
-                  <Link
-                    className="flex items-center gap-2"
-                    href={`/kit/${kit.id}/learn`}
-                  >
-                    Ucz się
-                    <LearnIcon />
-                  </Link>
-                </button>
+                <Link
+                  className="flex items-center gap-2 btn btn-accent"
+                  href={`/kit/${kit.id}/learn`}
+                >
+                  <LearnIcon />
+                  Ucz się
+                </Link>
               </span>
               <span
                 className={`${!nickname && "tooltip"}`}
                 data-tip={"Tylko dla zalogowanych"}
               >
-                <button disabled={!nickname} className="btn btn-accent">
-                  <Link
-                    className="flex items-center gap-2"
-                    href={`/kit/${kit.id}/exam`}
-                  >
-                    <DocumentIcon />
-                    Test
-                  </Link>
-                </button>
+                <Link
+                  className="flex items-center gap-2 btn btn-accent"
+                  href={`/kit/${kit.id}/exam`}
+                >
+                  <DocumentIcon />
+                  Test
+                </Link>
               </span>
             </div>
 
@@ -75,14 +73,14 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
 
             <div
               onClick={() => setView(view === "answer" ? "question" : "answer")}
-              className="container flex flex-col items-center justify-start w-full p-2 border-2 rounded-md cursor-pointer h-96 gap-y-2 border-base-300 bg-base-200 "
+              className="container flex flex-col items-center justify-around w-full p-2 border-2 rounded-md cursor-pointer min-h-[400px] gap-y-2 border-base-300 bg-base-200 "
             >
               <p>
-                {index + 1} / {kit.data.length}
+                {index + 1} / {kit.questions.length}
               </p>
 
-              <p className="flex items-center h-full text-2xl ">
-                {kit.data[index][view]}
+              <p className="flex items-center h-full text-2xl break-all ">
+                {kit.questions[index][view]}
               </p>
 
               <div className="flex gap-x-4">
@@ -110,7 +108,7 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
         </div>
 
         {kit.description ? <p>{kit.description}</p> : <p>Brak opisu</p>}
-        <div className="flex items-center p-2 gap-x-2 border-secondary max-w-fit">
+        <div className="flex items-center gap-x-2 border-secondary max-w-fit">
           <Link
             href={`/profile/${nickname}`}
             className="text-accent link-hover"
@@ -144,25 +142,28 @@ export const getServerSideProps = async (
     return { redirect: { permanent: false, destination: "/dashboard" } };
   }
 
-  const caller = kitsRouter.createCaller({
-    prismaClient,
-    req: ctx.req,
-    res: ctx.res,
+  const auth = await isUserLoggedIn(ctx.req);
+
+  const kit = await prismaClient.kit.findUnique({
+    where: { id },
+    include: {
+      questions: true,
+      user: { select: { avatarSeed: true, id: true, nickname: true } },
+    },
   });
-  try {
-    const [auth, kit] = await Promise.all([
-      isUserLoggedIn(ctx.req),
-      caller.getKitById({ kitId: id }),
-    ]);
-    const isCreator = auth?.session?.user.id === kit.createdBy;
-    return {
-      props: {
-        isCreator,
-        kit: JSON.parse(JSON.stringify(kit)),
-        nickname: auth?.session?.user.nickname ?? null,
-      },
-    };
-  } catch (error) {
-    return { redirect: { destination: "/404/kit", permanent: false } };
+
+  if (!kit) {
+    return { redirect: { destination: "/not-found", permanent: false } };
   }
+
+  const isCreator = auth?.session?.user.id === kit.createdBy;
+
+  return {
+    props: {
+      isCreator,
+
+      kit,
+      nickname: auth?.session?.user.nickname ?? null,
+    },
+  };
 };

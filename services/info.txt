@@ -1,0 +1,1 @@
+Services are code pieces used by both client and server

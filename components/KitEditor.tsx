@@ -1,11 +1,9 @@
-import { Kit } from "@prisma/client";
+import { Kit, KitQuestion } from "@prisma/client";
 import { TRPCClientError } from "@trpc/client";
 
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { CHARACTER_LIMIT } from "../constants";
-
-import { KitData } from "../types";
+import { useState } from "react";
+import { CHARACTER_LIMIT, LEAST_QUESTIONS_NEEDED } from "../constants";
 
 import { csrfHeader, trpc } from "../utils/trpc";
 import { serializeKitRouterError } from "../utils/zodErrors";
@@ -13,10 +11,12 @@ import { serializeKitRouterError } from "../utils/zodErrors";
 const KitEditor = ({
   initialData,
 }: {
-  initialData?: Kit & { data: KitData[] };
+  initialData?: Kit & { questions: KitQuestion[] };
 }) => {
   const csrfToken = trpc.auth.getCSRFToken.useQuery();
-  const [data, setData] = useState<KitData[]>(initialData?.data ?? []);
+  const [data, setData] = useState<Omit<KitQuestion, "id" | "kitId">[]>(
+    initialData?.questions ?? []
+  );
   const [name, setName] = useState(initialData?.name ?? "");
   const [description, setDescription] = useState(
     initialData?.description ?? ""
@@ -38,7 +38,7 @@ const KitEditor = ({
       setError("Nazwa musi mieć przynajmniej 3 znaki");
       return;
     }
-    if (data.length < 2) {
+    if (data.length < LEAST_QUESTIONS_NEEDED) {
       setError("Zestaw musi mieć przynjamniej 2 pytania");
       return;
     }
@@ -56,18 +56,17 @@ const KitEditor = ({
       return;
     }
 
-    let isTooManyChars = false;
     for (let i = 0; i < data.length; i++) {
       if (data[i].question.length > CHARACTER_LIMIT) {
         setError(`Pytanie nr ${i + 1} przekroczyło ${CHARACTER_LIMIT} słow. `);
-        isTooManyChars = true;
+
         return;
       }
       if (data[i].answer.length > CHARACTER_LIMIT) {
         setError(
           `Odpowiedz nr ${i + 1} przekroczyło ${CHARACTER_LIMIT} słow. `
         );
-        isTooManyChars = true;
+
         return;
       }
     }
@@ -96,7 +95,7 @@ const KitEditor = ({
     } else {
       //Else create new
       try {
-        const kit = await addKit.mutateAsync({ data, name, description });
+        const kit = await addKit.mutateAsync({ name, description, data });
 
         router.push(`/kit/${kit.id}`);
       } catch (error) {
@@ -126,10 +125,7 @@ const KitEditor = ({
   };
 
   const addNewItem = () => {
-    setData((prev) => [
-      ...prev,
-      { answer: "", question: "", id: crypto.randomUUID() },
-    ]);
+    setData((prev) => [...prev, { answer: "", question: "" }]);
   };
 
   const deleteItem = (index: number) => {
@@ -156,9 +152,7 @@ const KitEditor = ({
       <div className="flex flex-col mt-4 gap-y-4">
         <div className="form-control">
           <label className="input-group">
-            <span className="flex items-center justify-center w-28 ">
-              Nazwa
-            </span>
+            <span className="">Nazwa</span>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}

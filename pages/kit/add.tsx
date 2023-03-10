@@ -1,9 +1,9 @@
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
-import KitEditor from "../components/KitEditor";
+import KitEditor from "../../components/KitEditor";
 
-import Layout from "../components/layout";
+import Layout from "../../components/layout";
 
-import { isUserLoggedIn } from "../services/auth.service";
+import { isUserLoggedIn } from "../../services/auth.service";
 
 type Props = {
   nickname: string;

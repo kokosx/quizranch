@@ -1,15 +1,14 @@
+import { User } from "@prisma/client";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { useState } from "react";
 import Avatar from "../components/Avatar";
 import Layout from "../components/layout";
 import { prismaClient } from "../server/prisma";
-import { usersRouter } from "../server/routers/user.router";
-import { UserOutput } from "../server/routers/_app";
 import { isUserLoggedIn } from "../services/auth.service";
 import { csrfHeader, trpc } from "../utils/trpc";
 
 type Props = {
-  user: UserOutput["getUser"];
+  user: Pick<User, "avatarSeed" | "description" | "nickname">;
 };
 
 const Settings = ({ user }: Props) => {
@@ -123,14 +122,15 @@ export const getServerSideProps = async ({
   if (!auth?.session) {
     return { redirect: { destination: "/login", permanent: false } };
   }
-  const userCaller = usersRouter.createCaller({ prismaClient, req, res });
-  try {
-    const user = await userCaller.getUser({ id: auth.session.userId });
 
-    return { props: { user: JSON.parse(JSON.stringify(user)) } };
-  } catch (error) {
-    return { redirect: { destination: "/", permanent: false } };
+  const user = await prismaClient.user.findUnique({
+    where: { id: auth.session.userId },
+    select: { avatarSeed: true, nickname: true, description: true },
+  });
+  if (!user) {
+    return { redirect: { destination: "not-found", permanent: false } };
   }
+  return { props: { user } };
 };
 
 export default Settings;

@@ -1,17 +1,27 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { CHARACTER_LIMIT, MAX_KIT_AMOUNT } from "../../constants";
+import {
+  CHARACTER_LIMIT,
+  LEAST_QUESTIONS_NEEDED,
+  MAX_KIT_AMOUNT,
+} from "../../constants";
 import { KitData } from "../../types";
-import { authorizedProcedure, procedure, router } from "../trpc";
 
-//Utils:
-const kitBelongsToUser = ({
+import {
+  authenticatedProcedure,
+  authorizedProcedure,
+  procedure,
+  router,
+} from "../trpc";
+
+//Utils: TODO: Fix in edit
+export const kitBelongsToUser = ({
   usersKits,
-  userId,
+  kitId,
 }: {
   usersKits: { id: string }[];
-  userId: string;
-}): boolean => usersKits.filter((v) => v.id === userId).length !== 1;
+  kitId: string;
+}): boolean => usersKits.filter((v) => v.id === kitId).length !== 1;
 
 const errors = {
   kitSchema: {
@@ -39,7 +49,7 @@ const kitSchema = z.object({
       answer: z.string().min(1, "Answer cannot be empty").max(CHARACTER_LIMIT),
     })
     .array()
-    .min(2, errors.kitSchema.data.min),
+    .min(LEAST_QUESTIONS_NEEDED, errors.kitSchema.data.min),
 });
 
 export const kitsRouter = router({
@@ -49,15 +59,17 @@ export const kitsRouter = router({
       if (ctx.session.user.kits.length >= MAX_KIT_AMOUNT) {
         throw new TRPCError({ code: "FORBIDDEN", message: "Over 5 kits" });
       }
+
       try {
         const kit = await ctx.prismaClient.kit.create({
           data: {
             name: input.name,
             description: input.description,
             createdBy: ctx.session.userId,
-            data: input.data,
+            questions: { createMany: { data: input.data } },
           },
         });
+
         return kit;
       } catch (error) {
         throw new TRPCError({
@@ -89,12 +101,29 @@ export const kitsRouter = router({
       type typeWithJSON = typeof kitWithUser & { data: KitData[] };
       return kitWithUser as typeWithJSON;
     }),
+  getKitByIdWithProgress: authenticatedProcedure
+    .input(z.object({ kitId: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const kitWithProgress = await ctx.prismaClient.kit.findUnique({
+        where: { id: input.kitId },
+        include: {
+          progress: { where: { user: { id: ctx.session.userId } }, take: 1 },
+        },
+      });
+
+      if (!kitWithProgress) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Kit not found" });
+      }
+      type typeWithJSON = typeof kitWithProgress & { data: KitData[] };
+
+      return kitWithProgress as typeWithJSON;
+    }),
   deleteKitById: authorizedProcedure
     .input(z.object({ kitId: z.string() }))
     .mutation(async ({ ctx, input }) => {
       if (
         !kitBelongsToUser({
-          userId: ctx.session.userId,
+          kitId: input.kitId,
           usersKits: ctx.session.user.kits,
         })
       ) {
@@ -115,7 +144,7 @@ export const kitsRouter = router({
       //Check if user user authorized to mutate:
       if (
         !kitBelongsToUser({
-          userId: ctx.session.userId,
+          kitId: input.kitId,
           usersKits: ctx.session.user.kits,
         })
       ) {
@@ -125,7 +154,6 @@ export const kitsRouter = router({
         await ctx.prismaClient.kit.update({
           where: { id: input.kitId },
           data: {
-            data: input.data,
             name: input.name,
             description: input.description,
           },
