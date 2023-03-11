@@ -18,7 +18,7 @@ const setFavoredKit = authenticatedProcedure
         throw new TRPCError({ code: "CONFLICT" });
       }
       const existing = await ctx.prismaClient.favoriteKit.findMany({
-        where: { kitId: input.kitId },
+        where: { kitId: input.kitId, userId: ctx.session.userId },
       });
       const existingVal = existing[0];
 
@@ -52,7 +52,7 @@ const setFavoredNote = authenticatedProcedure
       }
 
       const existing = await ctx.prismaClient.favoriteNote.findMany({
-        where: { noteId: input.noteId },
+        where: { noteId: input.noteId, userId: ctx.session.userId },
       });
       const existingVal = existing[0];
       if (existingVal) {

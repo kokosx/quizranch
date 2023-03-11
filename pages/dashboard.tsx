@@ -1,6 +1,5 @@
 import type { FavoriteKit, FavoriteNote, Kit, Note } from "@prisma/client";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
-
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Layout from "../components/layout";
@@ -142,7 +141,7 @@ export const getServerSideProps = async ({
       include: { note: true },
     }),
   ]);
-
+  console.log(favoriteKits);
   return {
     props: {
       kits,
