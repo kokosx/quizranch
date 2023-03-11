@@ -190,7 +190,7 @@ const Learn = ({ kit, nickname, initialAnswers }: Props) => {
                 )
               );
             })}
-            <div>
+            <div className="flex flex-col gap-y-2">
               <h4 className="text-2xl font-semi text-secondary">
                 Niepoprawne odpowiedzi
               </h4>
