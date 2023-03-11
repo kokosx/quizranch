@@ -59,7 +59,7 @@ const Profile = ({ user, nickname }: Props) => {
                   <p className="text-2xl font-semibold">{user.nickname}</p>
                 </div>
 
-                <div className="">
+                <div className="flex flex-col items-center">
                   <h6 className="text-2xl">{v.name}</h6>
                   <div className="badge badge-primary badge-lg">
                     {getKitDataLength(i)} pojęcia
@@ -83,7 +83,7 @@ const Profile = ({ user, nickname }: Props) => {
                   <p className="text-2xl font-semibold">{user.nickname}</p>
                 </div>
 
-                <div className="">
+                <div className="flex flex-col items-center">
                   <h6 className="text-2xl">{v.name}</h6>
                 </div>
                 <Link href={`/kit/${v.id}`} className="btn btn-secondary">

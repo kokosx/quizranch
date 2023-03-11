@@ -78,7 +78,6 @@ model KitQuestion {
 
   question String
   answer String
-
   kitId String
   kit Kit @relation(fields: [kitId],references: [id],onDelete: Cascade)
 }

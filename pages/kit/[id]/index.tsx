@@ -135,7 +135,7 @@ const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
         {kit.description ? <p>{kit.description}</p> : <p>Brak opisu</p>}
         <div className="flex items-center gap-x-2 border-secondary max-w-fit">
           <Link
-            href={`/profile/${nickname}`}
+            href={`/profile/${kit.user.nickname}`}
             className="text-accent link-hover"
           >
             Utworzone przez {kit.user.nickname}
