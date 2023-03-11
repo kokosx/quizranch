@@ -6,6 +6,8 @@ import type { Note, User } from "@prisma/client";
 import TextEditor from "../../../components/TextEditor";
 import Avatar from "../../../components/Avatar";
 import Link from "next/link";
+import { useState } from "react";
+import { trpc } from "../../../utils/trpc";
 
 type Props = {
   nickname: string | null;
@@ -13,19 +15,39 @@ type Props = {
   note: Note & {
     user: Pick<User, "avatarSeed" | "nickname">;
   };
+  _isFavorite: boolean;
 };
 
-const Note = ({ nickname, note, userId }: Props) => {
+const Note = ({ nickname, note, userId, _isFavorite }: Props) => {
+  const [isFavorite, setIsFavorite] = useState(_isFavorite);
+
+  const changeFavorite = trpc.favorite.setFavoredNote.useMutation();
+
+  const handleChangeFavorite = () => {
+    setIsFavorite(!isFavorite);
+    changeFavorite.mutateAsync({ noteId: note.id }).catch(() => {
+      //setError("Wystąpił błąd")
+      setIsFavorite(!isFavorite);
+    });
+  };
+
   return (
     <Layout title={`Notatka ${note.name}`} nickname={nickname}>
       <div className="flex flex-col gap-y-2">
         <TextEditor canEdit={false} initialNote={note} userId={userId} />
+        {nickname && note.createdBy !== userId && (
+          <button
+            aria-label="HeartButton"
+            onClick={handleChangeFavorite}
+            className={` ${isFavorite ? "heart-icon-on" : "heart-icon"}`}
+          ></button>
+        )}
 
         <Link
-          className="flex items-center gap-x-2"
+          className="flex items-center gap-x-2 max-w-fit"
           href={`/profile/${note.user.nickname}`}
         >
-          <p>Utworzone przez {note.user.nickname}</p>
+          <p className="text-error">Utworzone przez {note.user.nickname}</p>
           <Avatar data={note.user} />
         </Link>
 
@@ -51,12 +73,31 @@ export const getServerSideProps = async ({
   }
   const auth = await isUserLoggedIn(req);
 
-  const note = await prismaClient.note.findUnique({
-    where: { id },
-    include: {
-      user: { select: { nickname: true, avatarSeed: true } },
-    },
-  });
+  const getFavorite = async () => {
+    if (!auth?.session) {
+      return false;
+    }
+    const favorites = await prismaClient.favoriteNote.findMany({
+      where: { userId: auth.session.userId, noteId: id },
+    });
+    const favorite = favorites[0];
+    if (favorite) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const getNote = async () => {
+    return await prismaClient.note.findUnique({
+      where: { id },
+      include: {
+        user: { select: { nickname: true, avatarSeed: true } },
+      },
+    });
+  };
+
+  const [note, isFavorite] = await Promise.all([getNote(), getFavorite()]);
   if (!note) {
     return { redirect: { permanent: false, destination: "/not-found" } };
   }
@@ -69,6 +110,7 @@ export const getServerSideProps = async ({
   }
   return {
     props: {
+      _isFavorite: isFavorite,
       userId: auth?.session?.userId ?? null,
       nickname: auth?.session?.user.nickname ?? null,
       note,

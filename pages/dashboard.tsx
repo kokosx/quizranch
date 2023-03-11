@@ -1,9 +1,10 @@
-import type { Kit, Note, User } from "@prisma/client";
+import type { FavoriteKit, FavoriteNote, Kit, Note } from "@prisma/client";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
-import Link from "next/link";
+
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Layout from "../components/layout";
+import DashboardLink from "../components/styled/DashboardLink";
 import { prismaClient } from "../server/prisma";
 import { isUserLoggedIn } from "../services/auth.service";
 
@@ -11,9 +12,21 @@ type Props = {
   kits: Kit[];
   nickname: string;
   notes: Note[];
+  favoriteKits: (FavoriteKit & {
+    kit: Kit;
+  })[];
+  favoriteNotes: (FavoriteNote & {
+    note: Note;
+  })[];
 };
 
-const Dashboard = ({ kits, nickname, notes }: Props) => {
+const Dashboard = ({
+  kits,
+  nickname,
+  notes,
+  favoriteKits,
+  favoriteNotes,
+}: Props) => {
   const router = useRouter();
   const [error, setError] = useState<false | string>(false);
 
@@ -34,9 +47,14 @@ const Dashboard = ({ kits, nickname, notes }: Props) => {
           </button>
 
           {kits.map((kit) => (
-            <Link href={`/kit/${kit.id}`} className="kit-button" key={kit.id}>
+            <DashboardLink href={`/kit/${kit.id}`} key={kit.id}>
               {kit.name}
-            </Link>
+            </DashboardLink>
+          ))}
+          {favoriteKits.map((v) => (
+            <DashboardLink href={`/kit/${v.kit.id}`} isFavorite key={v.kit.id}>
+              {v.kit.name}
+            </DashboardLink>
           ))}
         </div>
         {error && (
@@ -76,13 +94,19 @@ const Dashboard = ({ kits, nickname, notes }: Props) => {
           </button>
 
           {notes.map((note) => (
-            <Link
-              href={`/note/${note.id}`}
-              className="kit-button"
-              key={note.id}
-            >
+            <DashboardLink href={`/note/${note.id}`} key={note.id}>
               {note.name}
-            </Link>
+            </DashboardLink>
+          ))}
+
+          {favoriteNotes.map((v) => (
+            <DashboardLink
+              isFavorite
+              href={`/note/${v.note.id}`}
+              key={v.note.id}
+            >
+              {v.note.name}
+            </DashboardLink>
           ))}
         </div>
       </div>
@@ -102,19 +126,29 @@ export const getServerSideProps = async ({
     };
   }
 
-  const [kits, notes] = await Promise.all([
+  const [kits, notes, favoriteKits, favoriteNotes] = await Promise.all([
     prismaClient.kit.findMany({
       where: { createdBy: auth.session.userId },
     }),
     prismaClient.note.findMany({
       where: { createdBy: auth.session.userId },
     }),
+    prismaClient.favoriteKit.findMany({
+      where: { userId: auth.session.userId },
+      include: { kit: true },
+    }),
+    prismaClient.favoriteNote.findMany({
+      where: { userId: auth.session.userId },
+      include: { note: true },
+    }),
   ]);
 
   return {
     props: {
       kits,
+      favoriteKits,
       notes,
+      favoriteNotes,
       nickname: auth.session.user.nickname,
     },
   };

@@ -8,6 +8,7 @@ import { DocumentIcon, LearnIcon } from "../../../components/KitEditorIcons";
 import Avatar from "../../../components/Avatar";
 
 import type { Kit, KitQuestion, User } from "@prisma/client";
+import { trpc } from "../../../utils/trpc";
 
 type Props = {
   kit: Kit & { questions: KitQuestion[] } & {
@@ -15,11 +16,15 @@ type Props = {
   };
   isCreator: boolean;
   nickname: string | null;
+  _isFavorite: boolean;
 };
 
-const Kit = ({ isCreator, kit, nickname }: Props) => {
+const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
   const [index, setIndex] = useState(0);
   const [view, setView] = useState<"question" | "answer">("question");
+  const [isFavorite, setIsFavorite] = useState(_isFavorite);
+
+  const changeFavorite = trpc.favorite.setFavoredKit.useMutation();
 
   const nextQuestion = () => {
     if (index + 1 === kit.questions.length) {
@@ -36,6 +41,15 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
       setIndex(index - 1);
     }
   };
+
+  const handleChangeFavorite = () => {
+    setIsFavorite(!isFavorite);
+    changeFavorite.mutateAsync({ kitId: kit.id }).catch(() => {
+      //setError("Wystąpił błąd")
+      setIsFavorite(!isFavorite);
+    });
+  };
+
   return (
     <Layout nickname={nickname} title="Ucz się">
       <div className="flex flex-col gap-y-4">
@@ -67,6 +81,17 @@ const Kit = ({ isCreator, kit, nickname }: Props) => {
                   Test
                 </Link>
               </span>
+              <div className="ml-auto min-h-max min-w-max">
+                {nickname && !isCreator && (
+                  <button
+                    aria-label="HeartButton"
+                    onClick={handleChangeFavorite}
+                    className={` ${
+                      isFavorite ? "heart-icon-on" : "heart-icon"
+                    }`}
+                  ></button>
+                )}
+              </div>
             </div>
 
             <div className="divider"></div>
@@ -144,13 +169,32 @@ export const getServerSideProps = async (
 
   const auth = await isUserLoggedIn(ctx.req);
 
-  const kit = await prismaClient.kit.findUnique({
-    where: { id },
-    include: {
-      questions: true,
-      user: { select: { avatarSeed: true, id: true, nickname: true } },
-    },
-  });
+  const getKit = async () => {
+    return await prismaClient.kit.findUnique({
+      where: { id },
+      include: {
+        questions: true,
+        user: { select: { avatarSeed: true, id: true, nickname: true } },
+      },
+    });
+  };
+
+  const getFavorite = async () => {
+    if (!auth?.session) {
+      return false;
+    }
+    const favorites = await prismaClient.favoriteKit.findMany({
+      where: { userId: auth.session.userId, kitId: id },
+    });
+    const favorite = favorites[0];
+    if (favorite) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  const [kit, favorite] = await Promise.all([getKit(), getFavorite()]);
 
   if (!kit) {
     return { redirect: { destination: "/not-found", permanent: false } };
@@ -161,7 +205,7 @@ export const getServerSideProps = async (
   return {
     props: {
       isCreator,
-
+      _isFavorite: favorite,
       kit,
       nickname: auth?.session?.user.nickname ?? null,
     },

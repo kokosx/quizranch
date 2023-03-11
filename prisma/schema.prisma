@@ -25,7 +25,8 @@ model User {
   notes Note[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
+  favoriteNotes FavoriteNote[]
+  favoriteKits FavoriteKit[]
 }
 
 model Note {
@@ -35,8 +36,16 @@ model Note {
   name String
   data String
   visibility String
-  
+  favored FavoriteNote[]
   createdAt DateTime @default(now())
+}
+
+model FavoriteNote {
+  id BigInt @id @default(autoincrement())
+  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+  userId String
+  note Note @relation(fields: [noteId],references: [id],onDelete: Cascade)
+  noteId String
 }
 
 model Kit {
@@ -50,10 +59,18 @@ model Kit {
 
 
   createdAt DateTime @default(now())
-  
+  favored FavoriteKit[]
   questions KitQuestion[]
   progress Progress[]
 
+}
+
+model FavoriteKit {
+  id BigInt @id @default(autoincrement())
+  user User @relation(fields: [userId],references: [id],onDelete: Cascade)
+  userId String
+  kit Kit @relation(fields: [kitId],references: [id],onDelete: Cascade)
+  kitId String
 }
 
 model KitQuestion {

@@ -5,6 +5,15 @@
 .kit-button {
   @apply flex items-center justify-center w-full md:w-72 lg:w-96 h-24 md:h-40 bg-base-100 rounded-md border-[3px] border-secondary text-xl hover:bg-base-300 duration-200 hover:scale-105 active:scale-95;
 }
+
+.heart-icon {
+  @apply h-6 w-6 bg-neutral mask mask-heart ease-in-out duration-150;
+}
+
+.heart-icon-on {
+  @apply h-6 w-6 bg-error mask mask-heart ease-in-out duration-150;
+}
+
 /*
 body {
   @apply text-white text-3xl bg-black;
