@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 type Props = {
   href: string;
+
   children?: ReactNode;
   isFavorite?: boolean;
 };
@@ -10,7 +11,7 @@ type Props = {
 const DashboardLink = ({ children, href, isFavorite }: Props) => {
   return (
     <Link
-      className="flex  items-center justify-center w-full md:w-72 lg:w-96 h-24 md:h-40 bg-base-100 rounded-md border-[3px] border-secondary relative  text-xl hover:bg-base-300 duration-200 hover:scale-105 active:scale-95"
+      className="flex items-center justify-center w-full md:w-72 lg:w-96 h-24 md:h-40 bg-base-100 rounded-md border-[3px] border-secondary relative text-xl hover:bg-base-300 duration-150 hover:scale-105 active:scale-95 "
       href={href}
     >
       {isFavorite && (

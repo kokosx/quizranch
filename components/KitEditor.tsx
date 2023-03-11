@@ -38,6 +38,10 @@ const KitEditor = ({
       setError("Nazwa musi mieć przynajmniej 3 znaki");
       return;
     }
+    if (name.length < 20) {
+      setError("Nazwa może mieć maksymalnie 2o znaków");
+      return;
+    }
     if (data.length < LEAST_QUESTIONS_NEEDED) {
       setError("Zestaw musi mieć przynjamniej 2 pytania");
       return;

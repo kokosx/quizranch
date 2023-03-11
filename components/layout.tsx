@@ -118,9 +118,15 @@ const Layout = ({
 
                   <li>
                     <button
-                      onClick={() => {
-                        logout.mutate();
-                        router.push("/");
+                      onClick={async () => {
+                        logout
+                          .mutateAsync()
+                          .then(() => {
+                            router.push("/");
+                          })
+                          .catch(() => {
+                            router.push("/");
+                          });
                       }}
                     >
                       Wyloguj się

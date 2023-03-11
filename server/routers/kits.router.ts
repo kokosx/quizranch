@@ -37,7 +37,7 @@ const errors = {
 //
 
 const kitSchema = z.object({
-  name: z.string().min(3, errors.kitSchema.name.min),
+  name: z.string().min(3, errors.kitSchema.name.min).max(20),
   description: z.string().default(""),
 
   data: z

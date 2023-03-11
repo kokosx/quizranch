@@ -141,7 +141,6 @@ export const getServerSideProps = async ({
       include: { note: true },
     }),
   ]);
-  console.log(favoriteKits);
   return {
     props: {
       kits,
