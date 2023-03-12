@@ -119,8 +119,9 @@ const KitEditor = ({
     csrfHeader.value = csrfToken.data?.id;
     try {
       //@ts-expect-error
-      await deleteKit.mutateAsync({ kitId: initialData.id });
-      router.push("/");
+      await deleteKit.mutateAsync({ kitId: initialData.id }).then(() => {
+        router.push("/");
+      });
     } catch (error) {
       if (error instanceof TRPCClientError) {
         csrfToken.refetch();
