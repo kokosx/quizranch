@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 
 import Layout from "../../../components/layout";
+import ErrorDialog from "../../../components/styled/ErrorDialog";
 import { prismaClient } from "../../../server/prisma";
 import { isUserLoggedIn } from "../../../services/auth.service";
 
@@ -226,29 +227,9 @@ const Learn = ({ kit, nickname, initialAnswers }: Props) => {
         </Link>
         {didEnd ? showEndView() : showQuizView()}
       </div>
-      {error && (
-        <div className="toast toast-end ">
-          <div className="shadow-lg alert alert-error">
-            <div className="">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                onClick={() => setError(false)}
-                className="flex-shrink-0 w-8 h-8 cursor-pointer stroke-current"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span>Wystąpił nieznany błąd</span>
-            </div>
-          </div>
-        </div>
-      )}
+      <ErrorDialog isOpen={error} onClose={() => setError(false)}>
+        Wystąpił nieznany błąd
+      </ErrorDialog>
     </Layout>
   );
 };

@@ -8,3 +8,4 @@ TODO: add try catch blocks in ssr || safe parse;
 TODO: add form validation
 TODO: try catch in routers
 //TODO: make note/:id show textarea by default ??
+TODO: Automatically close error dialog

@@ -106,7 +106,7 @@ export const authRouter = router({
       if (!foundUser) {
         throw new TRPCError({
           code: "NOT_FOUND",
-          message: "User not found",
+          message: "Nie ma takiego użytkownika",
         });
       }
 

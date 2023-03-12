@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 
 type Props = {
   isOpen: boolean;
@@ -7,6 +7,15 @@ type Props = {
 };
 
 const ErrorDialog = ({ isOpen, onClose, children }: Props) => {
+  useEffect(() => {
+    const id = setTimeout(() => {
+      onClose();
+    }, 5000);
+    return () => {
+      clearTimeout(id);
+    };
+  }, [onClose]);
+
   return isOpen ? (
     <div className="toast toast-end ">
       <div className="shadow-lg alert alert-error">

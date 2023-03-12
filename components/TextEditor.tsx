@@ -11,6 +11,7 @@ import { csrfHeader, trpc } from "../utils/trpc";
 import { useRouter } from "next/router";
 import { Note } from "@prisma/client";
 import TextEditorBar from "./TextEditorBar";
+import ErrorDialog from "./styled/ErrorDialog";
 
 type Props = {
   initialNote: Note | null;
@@ -52,7 +53,7 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
   const updateNote = trpc.note.updateNote.useMutation();
   const addNote = trpc.note.addNote.useMutation();
   const deleteNote = trpc.note.deleteNote.useMutation();
-  const [error, setError] = useState<string | undefined>();
+  const [error, setError] = useState<string | false>(false);
   const router = useRouter();
   const [canSave, setCanSave] = useState(false);
   const [name, setName] = useState(initialNote?.name ?? "");
@@ -216,15 +217,9 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
       )}
 
       <EditorContent editor={editor} />
-      {error && (
-        <div className="toast">
-          <div className="alert alert-error">
-            <div>
-              <span>{error}</span>
-            </div>
-          </div>
-        </div>
-      )}
+      <ErrorDialog isOpen={error !== false} onClose={() => setError(false)}>
+        {error}
+      </ErrorDialog>
     </div>
   );
 };
