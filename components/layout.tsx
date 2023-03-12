@@ -115,7 +115,11 @@ const Layout = ({
                       Ustawienia
                     </Link>
                   </li>
-
+                  <li>
+                    <Link href="/bugreport" className="justify-between">
+                      Zgłoś błąd
+                    </Link>
+                  </li>
                   <li>
                     <button
                       onClick={async () => {

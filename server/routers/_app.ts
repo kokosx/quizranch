@@ -1,6 +1,7 @@
 import { inferRouterOutputs } from "@trpc/server";
 import { router } from "../trpc";
 import { authRouter } from "./auth.router";
+import { errorReportRouter } from "./error_report.router";
 import { favoriteRouter } from "./favorite.router";
 import { kitsRouter } from "./kits.router";
 import { loaderRouter } from "./loaders.router";
@@ -16,6 +17,7 @@ export const appRouter = router({
   favorite: favoriteRouter,
   progress: progressRouter,
   loaders: loaderRouter,
+  errorReport: errorReportRouter,
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;

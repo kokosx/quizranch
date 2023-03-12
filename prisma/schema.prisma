@@ -27,6 +27,7 @@ model User {
   updatedAt DateTime @updatedAt
   favoriteNotes FavoriteNote[]
   favoriteKits FavoriteKit[]
+  errorReports ErrorReport[]
 }
 
 model Note {
@@ -38,6 +39,8 @@ model Note {
   visibility String
   favored FavoriteNote[]
   createdAt DateTime @default(now())
+
+  
 }
 
 model FavoriteNote {
@@ -105,3 +108,11 @@ model CsrfToken {
   session Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   sessionId String @unique
 } 
+
+model ErrorReport {
+  id String @id @default(uuid())
+  createdBy String
+  user User @relation(fields: [createdBy], references: [id])
+  createdAt DateTime @default(now())
+  description String
+}
