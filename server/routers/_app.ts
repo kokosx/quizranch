@@ -3,6 +3,7 @@ import { router } from "../trpc";
 import { authRouter } from "./auth.router";
 import { favoriteRouter } from "./favorite.router";
 import { kitsRouter } from "./kits.router";
+import { loaderRouter } from "./loaders.router";
 import { notesRouter } from "./notes.router";
 import { progressRouter } from "./progress.router";
 import { usersRouter } from "./user.router";
@@ -14,6 +15,7 @@ export const appRouter = router({
   note: notesRouter,
   favorite: favoriteRouter,
   progress: progressRouter,
+  loaders: loaderRouter,
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;

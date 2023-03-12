@@ -28,7 +28,7 @@ const Profile = ({ user, nickname }: Props) => {
   const getKitDataLength = (i: number) => {
     return user.kits[i].questions.length;
   };
-  console.log(user);
+
   return (
     <Layout nickname={nickname} title={`Profil ${user.nickname}`}>
       <div className="flex flex-col">

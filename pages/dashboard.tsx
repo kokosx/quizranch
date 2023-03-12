@@ -1,33 +1,49 @@
 import type { FavoriteKit, FavoriteNote, Kit, Note } from "@prisma/client";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import Layout from "../components/layout";
+import { Spinner } from "../components/Spinner";
 import DashboardLink from "../components/styled/DashboardLink";
 import { prismaClient } from "../server/prisma";
 import { isUserLoggedIn } from "../services/auth.service";
+import { trpc } from "../utils/trpc";
 
 type Props = {
-  kits: Kit[];
   nickname: string;
+  /*kits: Kit[];
   notes: Note[];
   favoriteKits: (FavoriteKit & {
     kit: Kit;
   })[];
   favoriteNotes: (FavoriteNote & {
     note: Note;
-  })[];
+  })[];*/
 };
 
-const Dashboard = ({
-  kits,
-  nickname,
-  notes,
-  favoriteKits,
-  favoriteNotes,
-}: Props) => {
+const Dashboard = ({ nickname }: Props) => {
   const router = useRouter();
   const [error, setError] = useState<false | string>(false);
+
+  const { data, isLoading, isError } = trpc.loaders.dashboardLoader.useQuery();
+
+  if (isError) {
+    return (
+      <Layout nickname={nickname} title="Błąd">
+        Wystąpił błąd
+        <Link href="/">Powrót</Link>
+      </Layout>
+    );
+  }
+
+  if (isLoading || !data) {
+    return (
+      <div className="flex items-center justify-center w-full h-screen">
+        <Spinner _className="h-20 w-20" />
+      </div>
+    );
+  }
 
   return (
     <Layout nickname={nickname} title="Dashboard">
@@ -36,7 +52,7 @@ const Dashboard = ({
         <div className="flex flex-col flex-wrap justify-center gap-4 lg:gap-8 md:justify-start md:flex-row">
           <button
             onClick={() =>
-              kits.length < 5
+              data.kits.length < 5
                 ? router.push("/kit/add")
                 : setError("Limit 5 zestawów")
             }
@@ -45,12 +61,12 @@ const Dashboard = ({
             Dodaj
           </button>
 
-          {kits.map((kit) => (
+          {data.kits.map((kit) => (
             <DashboardLink href={`/kit/${kit.id}`} key={kit.id}>
               {kit.name}
             </DashboardLink>
           ))}
-          {favoriteKits.map((v) => (
+          {data?.favoriteKits.map((v) => (
             <DashboardLink href={`/kit/${v.kit.id}`} isFavorite key={v.kit.id}>
               {v.kit.name}
             </DashboardLink>
@@ -83,7 +99,7 @@ const Dashboard = ({
         <div className="flex flex-col flex-wrap justify-center gap-4 lg:gap-8 md:justify-start md:flex-row">
           <button
             onClick={() =>
-              notes.length < 5
+              data.notes.length < 5
                 ? router.push("/note/add")
                 : setError("Limit 5 notatek")
             }
@@ -92,13 +108,13 @@ const Dashboard = ({
             Dodaj
           </button>
 
-          {notes.map((note) => (
+          {data.notes.map((note) => (
             <DashboardLink href={`/note/${note.id}`} key={note.id}>
               {note.name}
             </DashboardLink>
           ))}
 
-          {favoriteNotes.map((v) => (
+          {data.favoriteNotes.map((v) => (
             <DashboardLink
               isFavorite
               href={`/note/${v.note.id}`}
@@ -117,7 +133,6 @@ export default Dashboard;
 
 export const getServerSideProps = async ({
   req,
-  res,
 }: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> => {
   const auth = await isUserLoggedIn(req);
   if (!auth?.session) {
@@ -125,7 +140,7 @@ export const getServerSideProps = async ({
       redirect: { destination: "/login", permanent: false },
     };
   }
-
+  /*
   const [kits, notes, favoriteKits, favoriteNotes] = await Promise.all([
     prismaClient.kit.findMany({
       where: { createdBy: auth.session.userId },
@@ -141,13 +156,9 @@ export const getServerSideProps = async ({
       where: { userId: auth.session.userId },
       include: { note: true },
     }),
-  ]);
+  ]);*/
   return {
     props: {
-      kits,
-      favoriteKits,
-      notes,
-      favoriteNotes,
       nickname: auth.session.user.nickname,
     },
   };
