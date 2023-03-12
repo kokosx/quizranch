@@ -1,31 +1,51 @@
 import { User } from "@prisma/client";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
-import { useState } from "react";
+import { useRouter } from "next/router";
+import { useEffect, useState } from "react";
 import Avatar from "../components/Avatar";
 import Layout from "../components/layout";
-import { prismaClient } from "../server/prisma";
+import { Spinner } from "../components/Spinner";
+import ErrorDialog from "../components/styled/ErrorDialog";
+
 import { isUserLoggedIn } from "../services/auth.service";
 import { csrfHeader, trpc } from "../utils/trpc";
 
 type Props = {
-  user: Pick<User, "avatarSeed" | "description" | "nickname">;
+  nickname: string | null;
 };
 
-const Settings = ({ user }: Props) => {
-  const [avatarSeed, setAvatarSeed] = useState<string | undefined>(
-    user.avatarSeed ?? user.nickname
-  );
+const Settings = ({ nickname }: Props) => {
+  const router = useRouter();
+
+  const { data, isLoading, isError } = trpc.loaders.settingsLoader.useQuery();
+
+  if (isError) {
+    router.push("/dashboard");
+  }
+
+  const [avatarSeed, setAvatarSeed] = useState<string | undefined>(undefined);
   const csrfToken = trpc.auth.getCSRFToken.useQuery();
-  const [description, setDescription] = useState(user.description ?? "");
+  const [description, setDescription] = useState("");
   const userMutation = trpc.user.editUser.useMutation();
   const [error, setError] = useState<string | false>(false);
 
   const getNewAvatar = () => {
     setAvatarSeed(crypto.randomUUID());
   };
+
+  useEffect(() => {
+    //Update after fetch
+    if (!data) {
+      return;
+    }
+    setDescription(data.description ?? "");
+    setAvatarSeed(data.avatarSeed ?? data.nickname);
+  }, [data]);
+
   const handleEdit = async () => {
     setError(false);
     csrfHeader.value = csrfToken.data?.id;
+
     let _description: string | undefined = description;
     if (description.length < 5 && description.length !== 0) {
       setError("Opis musi być pusty lub zawierać przynamniej 3 znaki");
@@ -34,16 +54,25 @@ const Settings = ({ user }: Props) => {
     if (description.length === 0) {
       _description = undefined;
     }
-    await userMutation.mutateAsync({
-      avatarSeed: avatarSeed,
-      description: _description,
-    });
-    //TODO: Error handling
-    csrfToken.refetch();
+    userMutation
+      .mutateAsync({
+        avatarSeed: avatarSeed,
+        description: _description,
+      })
+      .catch(() => {
+        setError("Wystąpił nieznany błąd, spróbuj ponownie");
+        csrfToken.refetch();
+      });
   };
 
-  return (
-    <Layout title="Ustawienia konta" nickname={user.nickname}>
+  return isLoading || !data ? (
+    <Layout title="Ustawienia" nickname={nickname}>
+      <div className="flex items-center justify-center h-full">
+        <Spinner _className="h-20 w-20" />
+      </div>
+    </Layout>
+  ) : (
+    <Layout title="Ustawienia konta" nickname={nickname}>
       <h3 className="text-4xl font-semibold text-secondary">Ustawienia</h3>
       <div className="flex flex-col gap-y-2">
         <section className="flex flex-col">
@@ -51,8 +80,8 @@ const Settings = ({ user }: Props) => {
           <div className="flex items-center gap-x-2">
             <Avatar
               data={{
-                nickname: user.nickname,
-                avatarSeed: avatarSeed ?? user.avatarSeed,
+                nickname: data.nickname,
+                avatarSeed: avatarSeed ?? data.avatarSeed,
               }}
               size={150}
             />
@@ -87,50 +116,22 @@ const Settings = ({ user }: Props) => {
           </button>
         </section>
       </div>
-      {error && (
-        <div className="toast toast-end ">
-          <div className="shadow-lg alert alert-error">
-            <div className="">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                onClick={() => setError(false)}
-                className="flex-shrink-0 w-8 h-8 cursor-pointer stroke-current"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
-              <span>{error}</span>
-            </div>
-          </div>
-        </div>
-      )}
+      <ErrorDialog isOpen={error !== false} onClose={() => setError(false)}>
+        {error}
+      </ErrorDialog>
     </Layout>
   );
 };
 
 export const getServerSideProps = async ({
   req,
-  res,
 }: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> => {
   const auth = await isUserLoggedIn(req);
   if (!auth?.session) {
     return { redirect: { destination: "/login", permanent: false } };
   }
 
-  const user = await prismaClient.user.findUnique({
-    where: { id: auth.session.userId },
-    select: { avatarSeed: true, nickname: true, description: true },
-  });
-  if (!user) {
-    return { redirect: { destination: "not-found", permanent: false } };
-  }
-  return { props: { user } };
+  return { props: { nickname: auth.session.user.nickname } };
 };
 
 export default Settings;
