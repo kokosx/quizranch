@@ -32,6 +32,7 @@ const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
     } else {
       setIndex(index + 1);
     }
+    setView("question");
   };
 
   const previousQuestion = () => {
@@ -40,6 +41,7 @@ const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
     } else {
       setIndex(index - 1);
     }
+    setView("question");
   };
 
   const handleChangeFavorite = () => {
