@@ -25,6 +25,11 @@ const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
   const [isFavorite, setIsFavorite] = useState(_isFavorite);
 
   const changeFavorite = trpc.favorite.setFavoredKit.useMutation();
+  const progress = trpc.progress.getProgress.useQuery(
+    { kitId: kit.id },
+    { enabled: nickname ? true : false }
+  );
+  //Fetch progress only when user is logged in
 
   const nextQuestion = () => {
     if (index + 1 === kit.questions.length) {
@@ -50,6 +55,27 @@ const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
       //setError("Wystąpił błąd")
       setIsFavorite(!isFavorite);
     });
+  };
+
+  const getKnownPercentage = () => {
+    const known = kit.questions.filter((item) =>
+      progress.data?.learnt.includes(item.id)
+    );
+    return (known.length / kit.questions.length) * 100;
+  };
+
+  const renderProgress = () => {
+    const percentage = getKnownPercentage();
+    return (
+      <>
+        <progress
+          value={percentage}
+          max="100"
+          className="w-full progress progress-primary"
+        ></progress>
+        <p>{percentage}%</p>
+      </>
+    );
   };
 
   return (
@@ -95,9 +121,7 @@ const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
                 )}
               </div>
             </div>
-
             <div className="divider"></div>
-
             <div
               onClick={() => setView(view === "answer" ? "question" : "answer")}
               className="container flex flex-col items-center justify-around w-full p-2 border-2 rounded-md cursor-pointer min-h-[400px] gap-y-2 border-base-300 bg-base-200 "
@@ -130,6 +154,13 @@ const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
                   {">"}
                 </button>
               </div>
+            </div>
+            <div className="flex items-center justify-start w-full gap-x-2">
+              {progress.isInitialLoading && (
+                <progress className="w-72 progress-primary progress"></progress>
+              )}
+
+              {progress.data?.learnt && renderProgress()}
             </div>
           </div>
         </div>

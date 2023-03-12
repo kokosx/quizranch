@@ -34,8 +34,18 @@ const resetProgress = authenticatedProcedure
     return { message: "success" };
   });
 
+const getProgress = authenticatedProcedure
+  .input(z.object({ kitId: z.string() }))
+  .query(async ({ ctx, input }) => {
+    const progress = await ctx.prismaClient.progress.findFirst({
+      where: { kitId: input.kitId, userId: ctx.session.userId },
+    });
+    return progress;
+  });
+
 export const progressRouter = router({
   resetProgress,
   updateProgress,
   addProgress,
+  getProgress,
 });

@@ -2,10 +2,9 @@ TODO: Add max character constraint, improve ui on large amounts of characters
 TODO: Create abstraction for SSR
 TODO: Fix redirecting when not authed (with referrer)
 TODO: Change how username checks are performed and improve auth
-TODO: change router logic to services, fix note/:id to use a service
 TODO: ERror handling in note/add and kit/add + throwing in components/services
 TODO: add try catch blocks in ssr || safe parse;
 TODO: add form validation
 TODO: try catch in routers
 //TODO: make note/:id show textarea by default ??
-TODO: Automatically close error dialog
+TODO: reusable functions for calculating in kit/index kit/learn
