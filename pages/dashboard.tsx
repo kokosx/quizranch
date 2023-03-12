@@ -126,8 +126,6 @@ export const getServerSideProps = async ({
     };
   }
 
-  res.setHeader("Cache-Control", "no-store");
-
   const [kits, notes, favoriteKits, favoriteNotes] = await Promise.all([
     prismaClient.kit.findMany({
       where: { createdBy: auth.session.userId },

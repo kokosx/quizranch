@@ -40,14 +40,13 @@ const Layout = ({
       <div className="container flex flex-col justify-center w-full p-2 mx-auto">
         <nav className="flex items-center gap-2 p-0 pb-2 navbar bg-base-100">
           <h1 className="flex-1">
-            <Link
-              prefetch={false}
-              href={nickname ? "/dashboard" : "/"}
+            <button
+              onClick={() => router.push(nickname ? "/dashboard" : "/")}
               className="p-2 text-5xl font-semibold normal-case duration-200 rounded-md hover:bg-neutral "
             >
               <p className="md:hidden">Q</p>
               <p className="hidden md:block">Quizranch</p>
-            </Link>
+            </button>
           </h1>
 
           <div className="flex items-center justify-end w-full gap-x-2 ">
