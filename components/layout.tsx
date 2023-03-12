@@ -140,7 +140,7 @@ const Layout = ({
               </div>
             ) : (
               <Link href="/login" className="btn">
-                Zaloguj się
+                Rozpocznij
               </Link>
             )}
           </div>

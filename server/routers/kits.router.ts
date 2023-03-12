@@ -156,6 +156,10 @@ export const kitsRouter = router({
           data: {
             name: input.name,
             description: input.description,
+            questions: {
+              deleteMany: { kitId: input.kitId },
+              createMany: { data: input.data },
+            },
           },
         });
         return { message: "success" };

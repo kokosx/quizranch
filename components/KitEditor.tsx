@@ -94,7 +94,7 @@ const KitEditor = ({
         if (error instanceof TRPCClientError) {
           //If failed, generate new token from getServerSideProps
           csrfToken.refetch();
-          setError(serializeKitRouterError(error));
+          setError("Wystąpił błąd");
         }
       }
     } else {
@@ -120,7 +120,7 @@ const KitEditor = ({
     try {
       //@ts-expect-error
       await deleteKit.mutateAsync({ kitId: initialData.id }).then(() => {
-        router.push("/");
+        router.push("/dashboard");
       });
     } catch (error) {
       if (error instanceof TRPCClientError) {
