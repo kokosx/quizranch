@@ -5,6 +5,7 @@ const { withSuperjson } = require("next-superjson");
 const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
+  generateEtags: false,
 };
 
 const configWithPwa = withPWA(nextConfig);
