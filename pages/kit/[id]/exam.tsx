@@ -272,14 +272,13 @@ export const getServerSideProps = async ({
     where: { id: kitId },
     include: {
       questions: true,
-      progress: { where: { createdBy: auth.session.userId } },
     },
   });
 
   if (!kit) {
     return { redirect: { destination: "/not-found", permanent: false } };
   }
-  const usersProgress = kit.progress[0];
+
   //Copy of function above
   const possibleAnswers = [{ index: 0, id: kit.questions[0].id }];
   //There must be at least 2 possible answers;

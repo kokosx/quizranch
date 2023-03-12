@@ -4,6 +4,7 @@ import { authRouter } from "./auth.router";
 import { favoriteRouter } from "./favorite.router";
 import { kitsRouter } from "./kits.router";
 import { notesRouter } from "./notes.router";
+import { progressRouter } from "./progress.router";
 import { usersRouter } from "./user.router";
 
 export const appRouter = router({
@@ -12,6 +13,7 @@ export const appRouter = router({
   user: usersRouter,
   note: notesRouter,
   favorite: favoriteRouter,
+  progress: progressRouter,
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;

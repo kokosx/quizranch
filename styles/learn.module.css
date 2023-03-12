@@ -1,0 +1,12 @@
+.my-stack {
+  display: inline-grid;
+  place-items: center;
+  align-items: flex-end;
+}
+.my-stack > * {
+  grid-column-start: 1;
+  grid-row-start: 1;
+  transform: translateY(10%) scale(0.9);
+  z-index: 1;
+  width: 100%;
+}
