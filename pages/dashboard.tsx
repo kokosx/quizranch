@@ -117,6 +117,7 @@ export default Dashboard;
 
 export const getServerSideProps = async ({
   req,
+  res,
 }: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> => {
   const auth = await isUserLoggedIn(req);
   if (!auth?.session) {
@@ -124,6 +125,8 @@ export const getServerSideProps = async ({
       redirect: { destination: "/login", permanent: false },
     };
   }
+
+  res.setHeader("Cache-Control", "no-store");
 
   const [kits, notes, favoriteKits, favoriteNotes] = await Promise.all([
     prismaClient.kit.findMany({
