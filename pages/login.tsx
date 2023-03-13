@@ -39,7 +39,7 @@ const Login = () => {
 
     setError(false);
     const doPasswordsMatch = password === repeatPassword;
-    if (!doPasswordsMatch) {
+    if (!doPasswordsMatch && tab === "register") {
       setError("Hasła się nie zgadzają");
       return;
     }

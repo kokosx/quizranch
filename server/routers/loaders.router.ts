@@ -14,7 +14,7 @@ const dashboardLoader = authenticatedProcedure.query(async ({ ctx }) => {
       include: { kit: true },
     }),
     ctx.prismaClient.favoriteNote.findMany({
-      where: { userId: ctx.session.userId },
+      where: { userId: ctx.session.userId, note: { visibility: "PUBLIC" } },
       include: { note: true },
     }),
   ]);
