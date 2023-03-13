@@ -58,8 +58,6 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
   const [canSave, setCanSave] = useState(false);
   const [name, setName] = useState(initialNote?.name ?? "");
   const [visibility, setVisibility] = useState<NoteVisibility>(
-    //TODO: FIX
-    //@ts-expect-error
     initialNote?.visibility ?? "PRIVATE"
   );
 

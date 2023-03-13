@@ -36,7 +36,7 @@ model Note {
   createdBy String
   name String
   data String
-  visibility String
+  visibility NoteVisibility @default(PRIVATE)
   favored FavoriteNote[]
   createdAt DateTime @default(now())
 
@@ -115,4 +115,9 @@ model ErrorReport {
   user User @relation(fields: [createdBy], references: [id])
   createdAt DateTime @default(now())
   description String
+}
+
+enum NoteVisibility {
+  PUBLIC
+  PRIVATE
 }
