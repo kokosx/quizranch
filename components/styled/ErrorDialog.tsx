@@ -10,7 +10,7 @@ const ErrorDialog = ({ isOpen, onClose, children }: Props) => {
   useEffect(() => {
     const id = setTimeout(() => {
       onClose();
-    }, 5000);
+    }, 4000);
     return () => {
       clearTimeout(id);
     };

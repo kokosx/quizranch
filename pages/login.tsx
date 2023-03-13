@@ -1,6 +1,7 @@
 import type { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
 import { FormEvent, useEffect, useState } from "react";
+import AuthenticationSVG from "../components/AuthenticationSVG";
 import Layout from "../components/layout";
 
 import { isUserLoggedIn } from "../services/auth.service";
@@ -10,6 +11,7 @@ import { trpc } from "../utils/trpc";
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [repeatPassword, setRepeatPassword] = useState("");
   const [nickname, setNickname] = useState("");
 
   const register = trpc.auth.register.useMutation();
@@ -36,6 +38,11 @@ const Login = () => {
     e.preventDefault();
 
     setError(false);
+    const doPasswordsMatch = password === repeatPassword;
+    if (!doPasswordsMatch) {
+      setError("Hasła się nie zgadzają");
+      return;
+    }
     //Validate
     const isEmailValid = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
       email
@@ -67,11 +74,11 @@ const Login = () => {
   return (
     <Layout nickname={null} title="Zaloguj się">
       <div className="flex flex-wrap items-center px-5 mx-auto md:py-24">
-        <div className="pr-0 lg:w-3/5 md:w-1/2 md:pr-16 lg:pr-0">
-          <p className="mt-4 leading-relaxed">
-            Zacznij tworzyć własne zestawy do nauki które pomogą ci w zdobyciu
-            lepszych ocen
+        <div className="flex flex-col items-center pr-0 lg:w-3/5 md:w-1/2 md:pr-16 lg:pr-0">
+          <p className="mt-4 leading-relaxed text-center">
+            Zaloguj się, by tworzyć notatki, dodawać zestawy i się uczyć
           </p>
+          <AuthenticationSVG />
         </div>
         <form
           onSubmit={handleSubmit}
@@ -81,17 +88,22 @@ const Login = () => {
             {tab === "login" ? "Zaloguj się" : "Zarejestruj się"}
           </h2>
 
-          <label className="text-sm ">Email</label>
+          <label htmlFor="email" className="text-sm ">
+            Email
+          </label>
           <input
+            id="email"
             className="input input-bordered"
             placeholder="Pisz tu..."
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-
-          <label className="text-sm ">Hasło</label>
+          <label htmlFor="password" className="text-sm ">
+            Hasło
+          </label>
           <input
+            id="password"
             className="input input-bordered"
             placeholder="Pisz tu..."
             type="password"
@@ -101,8 +113,22 @@ const Login = () => {
 
           {tab === "register" && (
             <>
-              <label className="text-sm ">Nazwa użytkownika</label>
+              <label htmlFor="repeat-password" className="text-sm ">
+                Powtórz hasło
+              </label>
               <input
+                id="repeat-password"
+                className="input input-bordered"
+                placeholder="Pisz tu..."
+                type="password"
+                value={repeatPassword}
+                onChange={(e) => setRepeatPassword(e.target.value)}
+              />
+              <label htmlFor="nick" className="text-sm ">
+                Nazwa użytkownika
+              </label>
+              <input
+                id="nick"
                 className="input input-bordered"
                 placeholder="Pisz tu..."
                 type="text"
