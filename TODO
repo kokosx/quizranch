@@ -8,3 +8,5 @@ TODO: add form validation
 TODO: try catch in routers
 //TODO: make note/:id show textarea by default ??
 TODO: reusable functions for calculating in kit/index kit/learn
+TODO: Add loading to all buttons
+TODO: Change routing to server/side(a instead of link) for certain pages

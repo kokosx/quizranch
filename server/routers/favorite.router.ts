@@ -17,12 +17,13 @@ const setFavoredKit = authenticatedProcedure
       ) {
         throw new TRPCError({ code: "CONFLICT" });
       }
-      const existing = await ctx.prismaClient.favoriteKit.findMany({
-        where: { kitId: input.kitId, userId: ctx.session.userId },
+      const existing = await ctx.prismaClient.favoriteKit.findUnique({
+        where: {
+          kitId_userId: { kitId: input.kitId, userId: ctx.session.userId },
+        },
       });
-      const existingVal = existing[0];
 
-      if (existingVal) {
+      if (existing) {
         await ctx.prismaClient.favoriteKit.deleteMany({
           where: { kitId: input.kitId, userId: ctx.session.userId },
         });
@@ -51,11 +52,13 @@ const setFavoredNote = authenticatedProcedure
         throw new TRPCError({ code: "CONFLICT" });
       }
 
-      const existing = await ctx.prismaClient.favoriteNote.findMany({
-        where: { noteId: input.noteId, userId: ctx.session.userId },
+      const existing = await ctx.prismaClient.favoriteNote.findUnique({
+        where: {
+          userId_noteId: { noteId: input.noteId, userId: ctx.session.userId },
+        },
       });
-      const existingVal = existing[0];
-      if (existingVal) {
+
+      if (existing) {
         await ctx.prismaClient.favoriteNote.deleteMany({
           where: { noteId: input.noteId, userId: ctx.session.userId },
         });

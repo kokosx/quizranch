@@ -12,7 +12,7 @@ const addProgress = authenticatedProcedure
         learnt: input.learnt,
       },
     });
-    return "gwgds";
+    return { message: "Success" };
   });
 
 const updateProgress = authenticatedProcedure
@@ -37,8 +37,10 @@ const resetProgress = authenticatedProcedure
 const getProgress = authenticatedProcedure
   .input(z.object({ kitId: z.string() }))
   .query(async ({ ctx, input }) => {
-    const progress = await ctx.prismaClient.progress.findFirst({
-      where: { kitId: input.kitId, userId: ctx.session.userId },
+    const progress = await ctx.prismaClient.progress.findUnique({
+      where: {
+        kitId_userId: { kitId: input.kitId, userId: ctx.session.userId },
+      },
     });
     return progress;
   });

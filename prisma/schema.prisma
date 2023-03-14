@@ -44,11 +44,13 @@ model Note {
 }
 
 model FavoriteNote {
-  id BigInt @id @default(autoincrement())
+  
   user User @relation(fields: [userId],references: [id],onDelete: Cascade)
   userId String
   note Note @relation(fields: [noteId],references: [id],onDelete: Cascade)
   noteId String
+
+  @@unique([userId,noteId])
 }
 
 model Kit {
@@ -69,11 +71,13 @@ model Kit {
 }
 
 model FavoriteKit {
-  id BigInt @id @default(autoincrement())
+
   user User @relation(fields: [userId],references: [id],onDelete: Cascade)
   userId String
   kit Kit @relation(fields: [kitId],references: [id],onDelete: Cascade)
   kitId String
+
+  @@unique([kitId,userId])
 }
 
 model KitQuestion {
@@ -83,15 +87,19 @@ model KitQuestion {
   answer String
   kitId String
   kit Kit @relation(fields: [kitId],references: [id],onDelete: Cascade)
+
+
 }
 
 model Progress {
-  id String @default(uuid()) @id
+
   user User @relation(fields: [userId],references: [id], onDelete: Cascade)
   userId String
   kitId String
   kit Kit @relation(fields: [kitId],references: [id],onDelete: Cascade)
   learnt String[]
+
+  @@unique([kitId,userId])
 }
 
 
