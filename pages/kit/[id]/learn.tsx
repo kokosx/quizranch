@@ -23,7 +23,7 @@ const Learn = ({ nickname, kit, progress }: Props) => {
   const [newlyLearnt, setNewlyLearnt] = useState<string[]>([]);
 
   const getKnownPercentage = () => {
-    return (getAllLearnt().length / kit.questions.length) * 100;
+    return Math.floor((getAllLearnt().length / kit.questions.length) * 100);
   };
 
   const getStack = () => {

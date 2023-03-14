@@ -170,7 +170,10 @@ const Learn = ({ kit, nickname, initialAnswers }: Props) => {
               value={(correctAnswers.length / kit.questions.length) * 100}
               max="100"
             ></progress>
-            <p>{(correctAnswers.length / kit.questions.length) * 100}%</p>
+            <p>
+              {Math.floor((correctAnswers.length / kit.questions.length) * 100)}
+              %
+            </p>
           </div>
 
           <div className="flex flex-col gap-y-2">

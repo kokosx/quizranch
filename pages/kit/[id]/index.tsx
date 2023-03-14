@@ -61,7 +61,7 @@ const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
     const known = kit.questions.filter((item) =>
       progress.data?.learnt.includes(item.id)
     );
-    return (known.length / kit.questions.length) * 100;
+    return Math.floor((known.length / kit.questions.length) * 100);
   };
 
   const renderProgress = () => {
