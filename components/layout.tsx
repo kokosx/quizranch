@@ -41,7 +41,7 @@ const Layout = ({
         <nav className="flex items-center gap-2 p-0 pb-2 navbar bg-base-100">
           <h1 className="flex-1">
             <Link
-              href="/"
+              href={nickname ? "/dashboard" : "/"}
               className="p-2 text-5xl font-semibold normal-case duration-200 rounded-md hover:bg-neutral "
             >
               <p className="md:hidden">Q</p>
