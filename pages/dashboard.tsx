@@ -1,5 +1,6 @@
 import type { FavoriteKit, FavoriteNote, Kit, Note } from "@prisma/client";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
@@ -39,9 +40,14 @@ const Dashboard = ({ nickname }: Props) => {
 
   if (isLoading || !data) {
     return (
-      <div className="flex items-center justify-center w-full h-screen">
-        <Spinner _className="h-20 w-20" />
-      </div>
+      <>
+        <Head>
+          <title>Ładowanie</title>
+        </Head>
+        <div className="flex items-center justify-center w-full h-screen">
+          <Spinner _className="h-20 w-20" />
+        </div>
+      </>
     );
   }
 
