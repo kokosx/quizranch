@@ -199,12 +199,6 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
               {initialNote && (
                 <button
                   onClick={handleDelete}
-                  disabled={
-                    addNote.isLoading ||
-                    !canSave ||
-                    updateNote.isLoading ||
-                    deleteNote.isLoading
-                  }
                   type="button"
                   className={`btn btn-error ${isLoading && "loading"}`}
                 >
