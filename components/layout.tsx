@@ -123,14 +123,9 @@ const Layout = ({
                   <li>
                     <button
                       onClick={async () => {
-                        logout
-                          .mutateAsync()
-                          .then(() => {
-                            router.push("/");
-                          })
-                          .catch(() => {
-                            router.push("/");
-                          });
+                        logout.mutateAsync().finally(() => {
+                          window.location.href = "/";
+                        });
                       }}
                     >
                       Wyloguj się

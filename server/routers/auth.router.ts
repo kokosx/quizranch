@@ -135,19 +135,16 @@ export const authRouter = router({
     }),
   logout: procedure.mutation(async ({ ctx }) => {
     const existingCookie = ctx.req.cookies["sessionId"];
-    if (!existingCookie) {
-      throw new TRPCError({
-        message: "Already logged out",
-        code: "FORBIDDEN",
-      });
-    }
-    //Delete cookie
 
-    const hashedSessionId = _hash(existingCookie);
-    ctx.prismaClient.session
-      .delete({ where: { id: hashedSessionId } })
-      .catch(() => null);
-    deleteCookie("sessionId", { req: ctx.req, res: ctx.res });
+    //Delete cookie
+    if (existingCookie) {
+      const hashedSessionId = _hash(existingCookie);
+      ctx.prismaClient.session
+        .deleteMany({ where: { id: hashedSessionId } })
+        .catch(() => null);
+      deleteCookie("sessionId", { req: ctx.req, res: ctx.res });
+    }
+
     return { message: "Success" };
   }),
   getCSRFToken: authenticatedProcedure.query(async ({ ctx }) => {
