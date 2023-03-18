@@ -141,8 +141,11 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
 
   return (
     <div className="flex flex-col w-full h-full gap-y-2">
-      <form onSubmit={handleSubmit} className="flex items-center gap-x-4 ">
-        <div className="form-control">
+      <form
+        onSubmit={handleSubmit}
+        className="flex flex-col items-center lg:flex-row gap-y-2 gap-x-4 "
+      >
+        <div className="self-start form-control">
           <label className="input-group ">
             <span>Nazwa</span>
             <input
@@ -161,47 +164,49 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
             />
           </label>
         </div>
-        {canEdit && (
-          <>
-            <label htmlFor="share">Publiczny</label>
-            <input
-              checked={visibility === "PUBLIC"}
-              onChange={() =>
-                setVisibility(visibility === "PUBLIC" ? "PRIVATE" : "PUBLIC")
-              }
-              type="checkbox"
-              id="share"
-              className="checkbox"
-            />
+        <div className="flex items-center justify-start w-full gap-x-4">
+          {canEdit && (
+            <>
+              <label htmlFor="share">Publiczny</label>
+              <input
+                checked={visibility === "PUBLIC"}
+                onChange={() =>
+                  setVisibility(visibility === "PUBLIC" ? "PRIVATE" : "PUBLIC")
+                }
+                type="checkbox"
+                id="share"
+                className="checkbox"
+              />
 
-            <button
-              disabled={
-                addNote.isLoading ||
-                !canSave ||
-                updateNote.isLoading ||
-                deleteNote.isLoading
-              }
-              className="btn btn-success"
-            >
-              Zapisz
-            </button>
-            {initialNote && (
               <button
-                onClick={handleDelete}
                 disabled={
                   addNote.isLoading ||
                   !canSave ||
                   updateNote.isLoading ||
                   deleteNote.isLoading
                 }
-                type="button"
-                className="btn btn-error"
+                className="btn btn-success"
               >
-                Usuń
+                Zapisz
               </button>
-            )}
-          </>
-        )}
+              {initialNote && (
+                <button
+                  onClick={handleDelete}
+                  disabled={
+                    addNote.isLoading ||
+                    !canSave ||
+                    updateNote.isLoading ||
+                    deleteNote.isLoading
+                  }
+                  type="button"
+                  className="btn btn-error"
+                >
+                  Usuń
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </form>
       {canEdit && (
         <>
