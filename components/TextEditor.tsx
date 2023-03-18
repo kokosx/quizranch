@@ -60,6 +60,21 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
   const [visibility, setVisibility] = useState<NoteVisibility>(
     initialNote?.visibility ?? "PRIVATE"
   );
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setIsLoading(
+      csrfToken.isLoading ||
+        updateNote.isLoading ||
+        addNote.isLoading ||
+        deleteNote.isLoading
+    );
+  }, [
+    csrfToken.isLoading,
+    updateNote.isLoading,
+    addNote.isLoading,
+    deleteNote.isLoading,
+  ]);
 
   useEffect(() => {
     //Disallow saving if length is too big(shouldnt happen)
@@ -178,15 +193,7 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
                 className="checkbox"
               />
 
-              <button
-                disabled={
-                  addNote.isLoading ||
-                  !canSave ||
-                  updateNote.isLoading ||
-                  deleteNote.isLoading
-                }
-                className="btn btn-success"
-              >
+              <button className={`btn btn-success ${isLoading && "loading"}`}>
                 Zapisz
               </button>
               {initialNote && (
@@ -199,7 +206,7 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
                     deleteNote.isLoading
                   }
                   type="button"
-                  className="btn btn-error"
+                  className={`btn btn-error ${isLoading && "loading"}`}
                 >
                   Usuń
                 </button>
