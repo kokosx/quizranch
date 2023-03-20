@@ -8,64 +8,55 @@ import { deleteCookie } from "cookies-next";
 import omit from "object.omit";
 import _hash from "../utils/hash";
 import { SESSION_ID_LENGTH } from "../../constants";
+import { registerSchema } from "../schemas";
 
 export const authRouter = router({
-  register: procedure
-    .input(
-      z.object({
-        email: z.string().email("INVALID_EMAIL"),
-        password: z.string().min(5),
-        nickname: z.string().min(3).max(15),
-      })
-    )
-    .mutation(async ({ input, ctx }) => {
-      //See if user with this email/username already exists:
+  register: procedure.input(registerSchema).mutation(async ({ input, ctx }) => {
+    //See if user with this email/username already exists:
+    const emailAsLower = input.email.toLowerCase();
+    const userQuery = await ctx.prismaClient.user.findFirst({
+      where: {
+        OR: [
+          { email: { contains: emailAsLower, mode: "insensitive" } },
+          { nickname: { contains: input.nickname, mode: "insensitive" } },
+        ],
+      },
+    });
 
-      const emailAsLower = input.email.toLowerCase();
-
-      const userQuery = await ctx.prismaClient.user.findFirst({
-        where: {
-          OR: [
-            { email: { contains: emailAsLower, mode: "insensitive" } },
-            { nickname: { contains: input.nickname, mode: "insensitive" } },
-          ],
-        },
+    if (userQuery) {
+      throw new TRPCError({
+        code: "CONFLICT",
+        message: "Użytkownik z tą nazwą/mailem już istnieje",
       });
+    }
 
-      if (userQuery) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Użytkownik z tą nazwą/mailem już istnieje",
-        });
-      }
+    //Creating new user:
 
-      //Creating new user:
+    const hashedPassword = await hash(input.password, 12);
+    const sessionId = crypto.randomBytes(SESSION_ID_LENGTH).toString("hex");
 
-      const hashedPassword = await hash(input.password, 12);
-      const sessionId = crypto.randomBytes(SESSION_ID_LENGTH).toString("hex");
+    const hashedSessionId = _hash(sessionId);
 
-      const hashedSessionId = _hash(sessionId);
+    const user = await ctx.prismaClient.user.create({
+      data: {
+        email: emailAsLower,
+        nickname: input.nickname,
+        password: hashedPassword,
+      },
+    });
 
-      const user = await ctx.prismaClient.user.create({
-        data: {
-          email: emailAsLower,
-          nickname: input.nickname,
-          password: hashedPassword,
-        },
-      });
-
-      await ctx.prismaClient.session.create({
-        data: {
-          id: hashedSessionId,
-          userId: user.id,
-        },
-      });
-      setSessionCookie(sessionId, {
-        req: ctx.req,
-        res: ctx.res,
-      });
-      return { user: omit(user, "password") };
-    }),
+    await ctx.prismaClient.session.create({
+      data: {
+        id: hashedSessionId,
+        userId: user.id,
+      },
+    });
+    setSessionCookie(sessionId, {
+      req: ctx.req,
+      res: ctx.res,
+    });
+    return { user: omit(user, "password") };
+  }),
   login: procedure
     .input(
       z.object({

@@ -1,74 +1,56 @@
 import type { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import AuthenticationSVG from "../components/AuthenticationSVG";
 import Layout from "../components/layout";
 
 import { isUserLoggedIn } from "../services/auth.service";
 
 import { trpc } from "../utils/trpc";
+import { registerSchema } from "../server/schemas";
 
 const Login = () => {
+  //Form values:
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
   const [nickname, setNickname] = useState("");
-
-  const register = trpc.auth.register.useMutation();
-  const login = trpc.auth.login.useMutation();
-  const [error, setError] = useState<false | string>(false);
-
-  const router = useRouter();
-
-  useEffect(() => {
-    if (register.status === "success" || login.status === "success") {
-      router.push("/dashboard");
-    }
-    if (register.error) {
-      setError(register.error.message);
-    }
-    if (login.error) {
-      setError(login.error.message);
-    }
-  }, [login.status, register.status, router, login.error, register.error]);
-
   const [tab, setTab] = useState<"register" | "login">("register");
+  //Handling fetch state
+  const onError = (e: any) => {
+    setError(e.message);
+  };
+  const onSuccess = () => {
+    router.push("/dashboard");
+  };
+  //Fetch related
+  const register = trpc.auth.register.useMutation({ onError, onSuccess });
+  const login = trpc.auth.login.useMutation({ onError, onSuccess });
+  const [error, setError] = useState<false | string>(false);
+  const router = useRouter();
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
     setError(false);
+    //Check if passwords match
     const doPasswordsMatch = password === repeatPassword;
     if (!doPasswordsMatch && tab === "register") {
       setError("Hasła się nie zgadzają");
       return;
     }
-    //Validate
-    const isEmailValid = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(
-      email
-    );
-    if (!isEmailValid) {
-      setError("Email jest nieprawidłowy");
-      return;
-    }
-    if (nickname.length < 3 && tab === "register") {
-      setError("Nick musi mieć przynajmniej 3 znaki");
-      return;
-    }
-    if (nickname.length >= 15 && tab === "register") {
-      setError("Nick może mieć maksymalnie 15 znaków");
-      return;
-    }
-    if (password.length < 5) {
-      setError("Hasło musi mieć przynajmniej 5 znaków");
-      return;
-    }
 
     if (tab === "login") {
       login.mutate({ email, password });
-    } else {
-      register.mutate({ email, nickname, password });
+      return;
     }
+    //Else, register
+    const validated = registerSchema.safeParse({ email, password, nickname });
+    if (!validated.success) {
+      const singleError = validated.error.issues[0].message;
+      setError(singleError);
+      return;
+    }
+    register.mutate({ email, nickname, password });
   };
 
   return (
