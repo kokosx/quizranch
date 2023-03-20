@@ -21,50 +21,24 @@ export const authRouter = router({
     .mutation(async ({ input, ctx }) => {
       //See if user with this email/username already exists:
 
-      const userQuery = await ctx.prismaClient.user.findMany({
+      const emailAsLower = input.email.toLowerCase();
+
+      const userQuery = await ctx.prismaClient.user.findFirst({
         where: {
           OR: [
-            { email: { contains: input.email, mode: "insensitive" } },
+            { email: { contains: emailAsLower, mode: "insensitive" } },
             { nickname: { contains: input.nickname, mode: "insensitive" } },
           ],
         },
       });
 
-      let userExists = false;
-
-      //Check if nickname already exists:
-      for (let v of userQuery) {
-        const areTheSame = v.nickname.localeCompare(input.nickname, undefined, {
-          sensitivity: "base",
-        });
-        if (!areTheSame) {
-          userExists = true;
-          break;
-        }
-      }
-      if (userExists) {
+      if (userQuery) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "Użytkownik z tą nazwą już istnieje",
+          message: "Użytkownik z tą nazwą/mailem już istnieje",
         });
       }
 
-      //Check if email already exists:
-      for (let v of userQuery) {
-        const areTheSame = v.email.localeCompare(input.email, undefined, {
-          sensitivity: "base",
-        });
-        if (!areTheSame) {
-          userExists = true;
-          break;
-        }
-      }
-      if (userExists) {
-        throw new TRPCError({
-          code: "CONFLICT",
-          message: "Użytkownik z tym mailem już istnieje",
-        });
-      }
       //Creating new user:
 
       const hashedPassword = await hash(input.password, 12);
@@ -74,7 +48,7 @@ export const authRouter = router({
 
       const user = await ctx.prismaClient.user.create({
         data: {
-          email: input.email.toLowerCase(),
+          email: emailAsLower,
           nickname: input.nickname,
           password: hashedPassword,
         },
