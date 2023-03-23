@@ -193,7 +193,10 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
                 className="checkbox"
               />
 
-              <button className={`btn btn-success ${isLoading && "loading"}`}>
+              <button
+                disabled={!canSave}
+                className={`btn btn-success ${isLoading && "loading"}`}
+              >
                 Zapisz
               </button>
               {initialNote && (

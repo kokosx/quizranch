@@ -34,7 +34,10 @@ const Layout = ({
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
         <meta charSet="UTF-8" />
         <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="description" content="Create learning kits" />
+        <meta
+          name="description"
+          content="Quizranch służy do uczenia się, powtarzania materiału z lekcji, pisania testów oraz tworzenia notatek."
+        />
         <link rel="manifest" href="/manifest.json" />
       </Head>
       <div className="container flex flex-col justify-center w-full p-2 mx-auto">
