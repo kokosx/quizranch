@@ -16,7 +16,7 @@ type Props = {
   kit: Kit & { questions: KitQuestion[] };
   initialAnswers: { id: string; index: number }[];
 };
-
+//Tailwind: bg-error bg-success bg-neutral
 const Learn = ({ kit, nickname, initialAnswers }: Props) => {
   const {
     getBgClass,
