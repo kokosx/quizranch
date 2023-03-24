@@ -1,4 +1,3 @@
-import type { FavoriteKit, FavoriteNote, Kit, Note } from "@prisma/client";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import Head from "next/head";
 import Link from "next/link";
@@ -7,7 +6,6 @@ import { useState } from "react";
 import Layout from "../components/layout";
 import { Spinner } from "../components/Spinner";
 import DashboardLink from "../components/styled/DashboardLink";
-import { prismaClient } from "../server/prisma";
 import { isUserLoggedIn } from "../services/auth.service";
 import { trpc } from "../utils/trpc";
 

@@ -1,19 +1,9 @@
-import { Kit, User } from "@prisma/client";
-import { TRPCError } from "@trpc/server";
-import omit from "object.omit";
+import type { User } from "@prisma/client";
 import { z } from "zod";
-import { KitData } from "../../types";
 import { procedure, router } from "../trpc";
 import { authorizedProcedure } from "../trpc";
 
 export type UserWithoutPassword = Omit<User, "password">;
-
-export const excludePasswordFromKit = (main: {
-  user: Partial<User>;
-  [key: string]: any;
-}) => {
-  return (main.user.password = undefined);
-};
 
 export const usersRouter = router({
   searchForUser: procedure

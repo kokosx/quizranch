@@ -1,4 +1,3 @@
-import { User } from "@prisma/client";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";

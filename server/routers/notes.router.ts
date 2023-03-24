@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { TypeOf, z } from "zod";
+import { type TypeOf, z } from "zod";
 import {
   MAX_NOTE_AMOUNT,
   MAX_NOTE_LENGTH,

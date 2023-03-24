@@ -1,13 +1,10 @@
 import { botttsNeutral } from "@dicebear/collection";
 import { createAvatar } from "@dicebear/core";
+import type { User } from "@prisma/client";
 import Image from "next/image";
 
 type Props = {
-  data: {
-    avatarSeed?: string | null;
-    nickname: string;
-    [key: string]: any;
-  };
+  data: Partial<User> & Pick<User, "avatarSeed" | "nickname">;
   size?: number;
 };
 

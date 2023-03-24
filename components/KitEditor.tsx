@@ -1,4 +1,4 @@
-import { Kit, KitQuestion } from "@prisma/client";
+import type { Kit, KitQuestion } from "@prisma/client";
 import { TRPCClientError } from "@trpc/client";
 
 import { useRouter } from "next/router";
@@ -117,8 +117,10 @@ const KitEditor = ({
 
   const handleDeleteKit = async () => {
     csrfHeader.value = csrfToken.data?.id;
+    if (!initialData) {
+      return;
+    }
     try {
-      //@ts-expect-error
       await deleteKit.mutateAsync({ kitId: initialData.id }).then(() => {
         router.push("/dashboard");
       });

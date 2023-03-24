@@ -1,6 +1,6 @@
 import type { GetServerSidePropsContext } from "next";
 import { useRouter } from "next/router";
-import { FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 import AuthenticationSVG from "../components/AuthenticationSVG";
 import Layout from "../components/layout";
 
@@ -8,6 +8,8 @@ import { isUserLoggedIn } from "../services/auth.service";
 
 import { trpc } from "../utils/trpc";
 import { registerSchema } from "../server/schemas";
+import type { TRPCClientErrorLike } from "@trpc/client";
+import type { AppRouter } from "../server/routers/_app";
 
 const Login = () => {
   //Form values:
@@ -17,7 +19,7 @@ const Login = () => {
   const [nickname, setNickname] = useState("");
   const [tab, setTab] = useState<"register" | "login">("register");
   //Handling fetch state
-  const onError = (e: any) => {
+  const onError = (e: TRPCClientErrorLike<AppRouter>) => {
     setError(e.message);
   };
   const onSuccess = () => {

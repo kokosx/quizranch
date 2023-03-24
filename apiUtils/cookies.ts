@@ -1,5 +1,5 @@
 import { setCookie } from "cookies-next";
-import {
+import type {
   GetServerSidePropsContext,
   NextApiRequest,
   NextApiResponse,

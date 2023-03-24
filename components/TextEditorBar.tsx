@@ -10,19 +10,23 @@ import {
   IconItalic,
   IconList,
   IconListNumbers,
-  IconNewSection,
   IconQuote,
   IconSeparator,
   IconStrikethrough,
 } from "@tabler/icons-react";
 import { type Editor } from "@tiptap/react";
+import type { Level } from "@tiptap/extension-heading";
+
+type HeadingAttributes = {
+  level: Level;
+};
 
 const TextEditorBar = ({ editor }: { editor: Editor | null }) => {
   if (!editor) {
     return null;
   }
 
-  const btnClassName = (node: string, attr?: any) =>
+  const btnClassName = (node: string, attr?: HeadingAttributes) =>
     `btn btn-sm ${editor.isActive(node, attr) ? "btn-primary" : ""}`;
 
   return (

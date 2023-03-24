@@ -5,16 +5,20 @@ const dashboardLoader = authenticatedProcedure.query(async ({ ctx }) => {
   const [kits, notes, favoriteKits, favoriteNotes] = await Promise.all([
     ctx.prismaClient.kit.findMany({
       where: { createdBy: ctx.session.userId },
+      orderBy: { createdAt: "desc" },
     }),
     ctx.prismaClient.note.findMany({
       where: { createdBy: ctx.session.userId },
+      orderBy: { createdAt: "desc" },
     }),
     ctx.prismaClient.favoriteKit.findMany({
       where: { userId: ctx.session.userId },
+      orderBy: { kit: { createdAt: "desc" } },
       include: { kit: true },
     }),
     ctx.prismaClient.favoriteNote.findMany({
       where: { userId: ctx.session.userId, note: { visibility: "PUBLIC" } },
+      orderBy: { note: { createdAt: "desc" } },
       include: { note: true },
     }),
   ]);

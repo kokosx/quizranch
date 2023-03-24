@@ -5,11 +5,11 @@ import TextStyle from "@tiptap/extension-text-style";
 import CharacterCount from "@tiptap/extension-character-count";
 import { MAX_NOTE_LENGTH, MAX_NOTE_NAME_LENGTH } from "../constants";
 
-import { FormEvent, useEffect, useState } from "react";
-import { NoteVisibility } from "../server/routers/notes.router";
+import { type FormEvent, useEffect, useState } from "react";
+import type { NoteVisibility } from "../server/routers/notes.router";
 import { csrfHeader, trpc } from "../utils/trpc";
 import { useRouter } from "next/router";
-import { Note } from "@prisma/client";
+import type { Note } from "@prisma/client";
 import TextEditorBar from "./TextEditorBar";
 import ErrorDialog from "./styled/ErrorDialog";
 
@@ -145,9 +145,12 @@ const TextEditor = ({ initialNote, userId, canEdit }: Props) => {
   };
 
   const handleDelete = async () => {
+    if (!initialNote) {
+      return;
+    }
     try {
       csrfHeader.value = csrfToken.data?.id;
-      await deleteNote.mutateAsync({ noteId: initialNote!.id });
+      await deleteNote.mutateAsync({ noteId: initialNote.id });
       router.push("/dashboard");
     } catch (error) {
       setError("Wystąpił błąd");

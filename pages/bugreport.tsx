@@ -1,6 +1,6 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { type FormEvent, useState } from "react";
 import Layout from "../components/layout";
 import ErrorDialog from "../components/styled/ErrorDialog";
 import { isUserLoggedIn } from "../services/auth.service";

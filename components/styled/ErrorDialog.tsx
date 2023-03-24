@@ -2,7 +2,7 @@ import { type ReactNode, useEffect } from "react";
 
 type Props = {
   isOpen: boolean;
-  onClose: any;
+  onClose: () => void;
   children: ReactNode;
 };
 

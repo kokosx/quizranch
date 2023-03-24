@@ -9,6 +9,9 @@ import Avatar from "../../../components/Avatar";
 
 import type { Kit, KitQuestion, User } from "@prisma/client";
 import { trpc } from "../../../utils/trpc";
+import FlashcardLayout from "../../../features/kit/components/FlashcardLayout";
+import Flashcard from "../../../features/kit/components/Flashcard";
+import FlashcardProgress from "../../../features/kit/components/FlashcardProgress";
 
 type Props = {
   kit: Kit & { questions: KitQuestion[] } & {
@@ -19,9 +22,7 @@ type Props = {
   _isFavorite: boolean;
 };
 
-const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
-  const [index, setIndex] = useState(0);
-  const [view, setView] = useState<"question" | "answer">("question");
+const KitIndex = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
   const [isFavorite, setIsFavorite] = useState(_isFavorite);
 
   const changeFavorite = trpc.favorite.setFavoredKit.useMutation();
@@ -31,24 +32,6 @@ const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
   );
   //Fetch progress only when user is logged in
 
-  const nextQuestion = () => {
-    if (index + 1 === kit.questions.length) {
-      setIndex(0);
-    } else {
-      setIndex(index + 1);
-    }
-    setView("question");
-  };
-
-  const previousQuestion = () => {
-    if (index === 0) {
-      setIndex(kit.questions.length - 1);
-    } else {
-      setIndex(index - 1);
-    }
-    setView("question");
-  };
-
   const handleChangeFavorite = () => {
     setIsFavorite(!isFavorite);
     changeFavorite.mutateAsync({ kitId: kit.id }).catch(() => {
@@ -57,33 +40,12 @@ const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
     });
   };
 
-  const getKnownPercentage = () => {
-    const known = kit.questions.filter((item) =>
-      progress.data?.learnt.includes(item.id)
-    );
-    return Math.floor((known.length / kit.questions.length) * 100);
-  };
-
-  const renderProgress = () => {
-    const percentage = getKnownPercentage();
-    return (
-      <>
-        <progress
-          value={percentage}
-          max="100"
-          className="w-full progress progress-primary"
-        ></progress>
-        <p>{percentage}%</p>
-      </>
-    );
-  };
-
   return (
     <Layout nickname={nickname} title="Ucz się">
       <div className="flex flex-col gap-y-4">
         <h2 className="text-4xl font-semibold text-secondary">{kit.name}</h2>
         <div className="flex flex-col items-center justify-center w-full h-full">
-          <div className="flex flex-col items-center justify-center w-full md:w-10/12 lg:w-2/3 gap-y-2 ">
+          <FlashcardLayout>
             <div className="flex items-center w-full justify-evenly md:justify-start gap-x-2">
               <span
                 className={`${!nickname && "tooltip"}`}
@@ -122,47 +84,13 @@ const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
               </div>
             </div>
             <div className="divider"></div>
-            <div
-              onClick={() => setView(view === "answer" ? "question" : "answer")}
-              className="container flex flex-col items-center justify-around w-full p-2 border-2 rounded-md cursor-pointer min-h-[400px] gap-y-2 border-base-300 bg-base-200 "
-            >
-              <p>
-                {index + 1} / {kit.questions.length}
-              </p>
-
-              <p className="flex items-center h-full text-2xl break-all ">
-                {kit.questions[index][view]}
-              </p>
-
-              <div className="flex gap-x-4">
-                <button
-                  onClick={(e) => {
-                    previousQuestion();
-                    e.stopPropagation();
-                  }}
-                  className="btn"
-                >
-                  {"<"}
-                </button>
-                <button
-                  onClick={(e) => {
-                    nextQuestion();
-                    e.stopPropagation();
-                  }}
-                  className="btn"
-                >
-                  {">"}
-                </button>
-              </div>
-            </div>
-            <div className="flex items-center justify-start w-full gap-x-2">
-              {progress.isInitialLoading && (
-                <progress className="w-72 progress-primary progress"></progress>
-              )}
-
-              {progress.data?.learnt && renderProgress()}
-            </div>
-          </div>
+            <Flashcard kitQuestions={kit.questions} />
+            <FlashcardProgress
+              kitQuestions={kit.questions}
+              progressData={progress.data}
+              progressInitialLoading={progress.isInitialLoading}
+            />
+          </FlashcardLayout>
         </div>
 
         {kit.description ? <p>{kit.description}</p> : <p>Brak opisu</p>}
@@ -190,7 +118,7 @@ const Kit = ({ isCreator, kit, nickname, _isFavorite }: Props) => {
   );
 };
 
-export default Kit;
+export default KitIndex;
 
 export const getServerSideProps = async (
   ctx: GetServerSidePropsContext

@@ -5,7 +5,7 @@ import {
   LEAST_QUESTIONS_NEEDED,
   MAX_KIT_AMOUNT,
 } from "../../constants";
-import { KitData } from "../../types";
+import type { KitData } from "../../types";
 
 import {
   authenticatedProcedure,

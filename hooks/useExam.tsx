@@ -1,4 +1,4 @@
-import { KitQuestion } from "@prisma/client";
+import type { KitQuestion } from "@prisma/client";
 import { useState } from "react";
 
 type Params = {

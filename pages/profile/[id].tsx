@@ -72,7 +72,7 @@ const Profile = ({ user, nickname }: Props) => {
             );
           })}
           <h5 className="text-4xl font-semibold text-secondary">Notatki</h5>
-          {user.notes.map((v, i) => {
+          {user.notes.map((v) => {
             return (
               <div
                 className="flex items-center justify-between h-24 p-2 rounded-md bg-neutral"
@@ -102,7 +102,7 @@ export default Profile;
 
 export const getServerSideProps = async ({
   req,
-  res,
+
   params,
 }: GetServerSidePropsContext): Promise<GetServerSidePropsResult<Props>> => {
   const nickname = params?.id as unknown as string;

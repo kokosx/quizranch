@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Education } from "../components/Education";
 import Layout from "../components/layout";

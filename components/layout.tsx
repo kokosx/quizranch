@@ -1,7 +1,7 @@
 import Head from "next/head";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FormEvent, ReactNode, useState } from "react";
+import { type FormEvent, type ReactNode, useState } from "react";
 import { trpc } from "../utils/trpc";
 
 const Layout = ({

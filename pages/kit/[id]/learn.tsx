@@ -1,11 +1,17 @@
-import { Kit, KitQuestion, Progress } from "@prisma/client";
+import type { Kit, KitQuestion, Progress } from "@prisma/client";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
 import Layout from "../../../components/layout";
 import { prismaClient } from "../../../server/prisma";
 import { isUserLoggedIn } from "../../../services/auth.service";
-import { AnimatePresence, motion, PanInfo } from "framer-motion";
+import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import styles from "./../../../styles/learn.module.css";
 import { trpc } from "../../../utils/trpc";
 import ErrorDialog from "../../../components/styled/ErrorDialog";
@@ -213,7 +219,7 @@ type StackItemProps = {
   question: KitQuestion;
   active: boolean;
   removeQuestion: (oldCard: KitQuestion) => void;
-  setNewlyLearnt: any;
+  setNewlyLearnt: Dispatch<SetStateAction<string[]>>;
 };
 
 const StackItem = ({
@@ -224,11 +230,12 @@ const StackItem = ({
 }: StackItemProps) => {
   const [leaveX, setLeaveX] = useState(0);
 
-  const onDragEnd = (_e: any, info: PanInfo) => {
+  const onDragEnd = (_e: DragEvent, info: PanInfo) => {
     if (info.offset.x > 100) {
       setLeaveX(1000);
       removeQuestion(question);
-      setNewlyLearnt((current: any) => [...current, question.id]);
+
+      setNewlyLearnt((current) => [...current, question.id]);
     }
     if (info.offset.x < -100) {
       setLeaveX(-1000);

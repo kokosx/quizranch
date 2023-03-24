@@ -1,8 +1,8 @@
-import { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
+import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
 import Layout from "../../../components/layout";
 import { isUserLoggedIn } from "../../../services/auth.service";
 import { prismaClient } from "../../../server/prisma";
-import type { Note, User } from "@prisma/client";
+import { type Note, type User } from "@prisma/client";
 import TextEditor from "../../../components/TextEditor";
 import Avatar from "../../../components/Avatar";
 import Link from "next/link";
@@ -18,13 +18,13 @@ type Props = {
   _isFavorite: boolean;
 };
 
-const Note = ({ nickname, note, userId, _isFavorite }: Props) => {
+const NoteIndex = ({ nickname, note, userId, _isFavorite }: Props) => {
   const [isFavorite, setIsFavorite] = useState(_isFavorite);
 
   const changeFavorite = trpc.favorite.setFavoredNote.useMutation();
 
   const handleChangeFavorite = () => {
-    setIsFavorite(!isFavorite);
+    setIsFavorite(isFavorite);
     changeFavorite.mutateAsync({ noteId: note.id }).catch(() => {
       //setError("Wystąpił błąd")
       setIsFavorite(!isFavorite);
@@ -61,7 +61,7 @@ const Note = ({ nickname, note, userId, _isFavorite }: Props) => {
   );
 };
 
-export default Note;
+export default NoteIndex;
 
 export const getServerSideProps = async ({
   params,
