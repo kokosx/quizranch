@@ -17,12 +17,12 @@ describe("Tests for auth router", () => {
       req,
       res,
     });
-    const newUser = caller.register({
+    const { user } = await caller.register({
       email: "test@test.test",
       nickname: "Kokoti",
       password: "123123",
     });
-    expect((await newUser).user.nickname).toBe("Kokoti");
+    expect(user.nickname).toBe("Kokoti");
   });
   it("Throws an error if user with nickname already exists", async () => {
     const { email, nickname, password } = {
@@ -44,17 +44,20 @@ describe("Tests for auth router", () => {
       req,
       res,
     });
+    let error: TRPCError | null = null;
     try {
       await caller.register({
-        email,
-        nickname: "TesT123",
+        email: "fdsfds@vc.vcc",
+        nickname: "test123",
         password,
       });
-    } catch (error) {
-      if (error instanceof TRPCError) {
-        expect(error.code).toBe("CONFLICT");
+    } catch (_err) {
+      if (_err instanceof TRPCError) {
+        error = _err;
       }
     }
+
+    expect(error?.code).toBe("CONFLICT");
   });
 
   it("Throws an UNAUTHORIZED error if wrong password is given", async () => {

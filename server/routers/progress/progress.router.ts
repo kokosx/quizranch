@@ -1,5 +1,28 @@
 import { z } from "zod";
 import { authenticatedProcedure, router } from "../../trpc";
+import { TRPCError } from "@trpc/server";
+
+const upsertProgress = authenticatedProcedure
+  .input(z.object({ kitId: z.string(), learnt: z.string().array() }))
+  .mutation(async ({ ctx, input }) => {
+    try {
+      await ctx.prismaClient.progress.upsert({
+        create: {
+          kitId: input.kitId,
+          userId: ctx.session.userId,
+          learnt: input.learnt,
+        },
+        update: {
+          learnt: input.learnt,
+        },
+        where: {
+          kitId_userId: { kitId: input.kitId, userId: ctx.session.userId },
+        },
+      });
+    } catch (error) {
+      throw new TRPCError({ code: "NOT_FOUND" });
+    }
+  });
 
 const addProgress = authenticatedProcedure
   .input(z.object({ kitId: z.string(), learnt: z.string().array() }))
@@ -22,7 +45,7 @@ const updateProgress = authenticatedProcedure
       data: { learnt: input.learnt },
       where: { kitId: input.kitId, userId: ctx.session.userId },
     });
-    return { message: "success" };
+    return { message: "Success" };
   });
 
 const resetProgress = authenticatedProcedure
@@ -50,4 +73,5 @@ export const progressRouter = router({
   updateProgress,
   addProgress,
   getProgress,
+  upsertProgress,
 });

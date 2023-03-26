@@ -1,10 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import {
-  CHARACTER_LIMIT,
-  LEAST_QUESTIONS_NEEDED,
-  MAX_KIT_AMOUNT,
-} from "../../../constants";
+import { MAX_KIT_AMOUNT } from "../../../constants";
 import type { KitData } from "../../../types";
 
 import {

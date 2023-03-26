@@ -1,6 +1,5 @@
 import { TRPCError } from "@trpc/server";
 import { compare, hash } from "bcrypt";
-import { z } from "zod";
 import { setSessionCookie } from "../../../apiUtils/cookies";
 import { authenticatedProcedure, procedure, router } from "../../trpc";
 import crypto from "crypto";
@@ -18,16 +17,34 @@ export const authRouter = router({
       where: {
         OR: [
           { email: { contains: emailAsLower, mode: "insensitive" } },
-          { nickname: { contains: input.nickname, mode: "insensitive" } },
+          {
+            nickname: {
+              contains: input.nickname,
+              mode: "insensitive",
+            },
+          },
         ],
       },
     });
 
     if (userQuery) {
-      throw new TRPCError({
-        code: "CONFLICT",
-        message: "Użytkownik z tą nazwą/mailem już istnieje",
-      });
+      if (userQuery.email === emailAsLower) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Użytkownik z tym mailem już istnieje",
+        });
+      }
+      const isNicknameTheSame = input.nickname.localeCompare(
+        userQuery.nickname,
+        undefined,
+        { sensitivity: "accent" }
+      );
+      if (isNicknameTheSame === 0) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Użytkownik z tą nazwą już istnieje",
+        });
+      }
     }
 
     //Creating new user:

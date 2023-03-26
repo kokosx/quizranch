@@ -1,7 +1,6 @@
 import { prismaClient } from "../server/prisma";
 import type { GetServerSidePropsContext } from "next";
 import hash from "../server/utils/hash";
-import { Session, User } from "@prisma/client";
 
 //To be used in getServerSideProps
 
