@@ -1,5 +1,5 @@
 import { TRPCError } from "@trpc/server";
-import { authenticatedProcedure, router } from "../trpc";
+import { authenticatedProcedure, router } from "../../trpc";
 
 const dashboardLoader = authenticatedProcedure.query(async ({ ctx }) => {
   const [kits, notes, favoriteKits, favoriteNotes] = await Promise.all([

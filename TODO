@@ -2,5 +2,6 @@ TODO: Improve file structure
 TODO: Improve error messages
 TODO: Rewrite to stop using useeffect in api aclls
 TODO: Stop sending long ids to client with ssr
+TODO: add error messages
 
 TODO: TEST AFTER REWRITING

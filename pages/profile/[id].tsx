@@ -4,7 +4,6 @@ import { isUserLoggedIn } from "./../../services/auth.service";
 import { prismaClient } from "../../server/prisma";
 import Avatar from "../../components/Avatar";
 import Link from "next/link";
-import { noteVisibility } from "../../server/routers/notes.router";
 
 type Props = {
   nickname: string | null;
@@ -116,7 +115,7 @@ export const getServerSideProps = async ({
       nickname: true,
       description: true,
       notes: {
-        where: { visibility: noteVisibility.Enum.PUBLIC },
+        where: { visibility: "PUBLIC" },
         select: { name: true, id: true },
       },
       kits: {

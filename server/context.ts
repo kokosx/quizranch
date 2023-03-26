@@ -1,16 +1,15 @@
-import * as trpc from "@trpc/server";
-import * as trpcNext from "@trpc/server/adapters/next";
-import { CreateNextContextOptions } from "@trpc/server/adapters/next";
-import {
+import type trpc from "@trpc/server";
+import type trpcNext from "@trpc/server/adapters/next";
+import type {
   GetServerSidePropsContext,
   NextApiRequest,
   NextApiResponse,
 } from "next";
 import { prismaClient } from "./prisma";
-
+/*
 interface CreateContextOptions {
   // session: Session | null
-}
+}*/
 
 /**
  * Inner function for `createContext` where we create the context.
@@ -25,16 +24,14 @@ export async function createContextInner(_opts: {
   return { prismaClient, req, res };
 }
 
-export type Context = trpc.inferAsyncReturnType<typeof createContextInner>;
-
 /**
  * Creates context for an incoming request
  * @link https://trpc.io/docs/context
  */
-export async function createContext(
-  opts: trpcNext.CreateNextContextOptions
-): Promise<Context> {
+export async function createContext(opts: trpcNext.CreateNextContextOptions) {
   // for API-response caching see https://trpc.io/docs/caching
 
   return await createContextInner({ req: opts.req, res: opts.res });
 }
+
+export type Context = trpc.inferAsyncReturnType<typeof createContext>;

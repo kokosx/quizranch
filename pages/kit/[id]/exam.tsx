@@ -7,7 +7,7 @@ import { useState } from "react";
 
 import Layout from "../../../components/layout";
 import ErrorDialog from "../../../components/styled/ErrorDialog";
-import { useExam } from "../../../hooks/useExam";
+import { useExam } from "../../../features/kit/hooks/useExam";
 import { prismaClient } from "../../../server/prisma";
 import { isUserLoggedIn } from "../../../services/auth.service";
 

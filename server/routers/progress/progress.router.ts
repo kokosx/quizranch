@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { authenticatedProcedure, router } from "../trpc";
+import { authenticatedProcedure, router } from "../../trpc";
 
 const addProgress = authenticatedProcedure
   .input(z.object({ kitId: z.string(), learnt: z.string().array() }))

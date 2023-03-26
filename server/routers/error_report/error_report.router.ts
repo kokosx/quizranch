@@ -1,14 +1,9 @@
 import { TRPCError } from "@trpc/server";
-import { z } from "zod";
-import { authenticatedProcedure, router } from "../trpc";
+import { authenticatedProcedure, router } from "../../trpc";
+import { addReportSchema } from "./schemas";
 
 const addReport = authenticatedProcedure
-  .input(
-    z.object({
-      description: z.string().max(1000),
-      title: z.string().min(5).max(200),
-    })
-  )
+  .input(addReportSchema)
   .mutation(async ({ ctx, input }) => {
     try {
       await ctx.prismaClient.errorReport.create({

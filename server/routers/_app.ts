@@ -1,13 +1,13 @@
 import type { inferRouterOutputs } from "@trpc/server";
 import { router } from "../trpc";
-import { authRouter } from "./auth.router";
-import { errorReportRouter } from "./error_report.router";
-import { favoriteRouter } from "./favorite.router";
-import { kitsRouter } from "./kits.router";
-import { loaderRouter } from "./loaders.router";
-import { notesRouter } from "./notes.router";
-import { progressRouter } from "./progress.router";
-import { usersRouter } from "./user.router";
+import { authRouter } from "./auth/auth.router";
+import { errorReportRouter } from "./error_report/error_report.router";
+import { favoriteRouter } from "./favorite/favorite.router";
+import { kitsRouter } from "./kits/kits.router";
+import { loaderRouter } from "./loaders/loaders.router";
+import { notesRouter } from "./notes/notes.router";
+import { progressRouter } from "./progress/progress.router";
+import { usersRouter } from "./user/user.router";
 
 export const appRouter = router({
   auth: authRouter,
@@ -22,9 +22,4 @@ export const appRouter = router({
 // export type definition of API
 export type AppRouter = typeof appRouter;
 
-type RouterOutput = inferRouterOutputs<AppRouter>;
-
-export type AuthOutput = RouterOutput["auth"];
-export type KitOutput = RouterOutput["kit"];
-export type UserOutput = RouterOutput["user"];
-export type NoteOutput = RouterOutput["note"];
+export type RouterOutputs = inferRouterOutputs<AppRouter>;

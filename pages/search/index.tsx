@@ -1,29 +1,25 @@
 import Layout from "../../components/layout";
 import type { GetServerSidePropsContext, GetServerSidePropsResult } from "next";
-import { kitsRouter } from "../../server/routers/kits.router";
+import { kitsRouter } from "../../server/routers/kits/kits.router";
 import { prismaClient } from "../../server/prisma";
 import Avatar from "../../components/Avatar";
 import Link from "next/link";
 import { isUserLoggedIn } from "../../services/auth.service";
-import { usersRouter } from "../../server/routers/user.router";
+import { usersRouter } from "../../server/routers/user/user.router";
 import { trpc } from "../../utils/trpc";
 import { useEffect, useState } from "react";
-import type {
-  KitOutput,
-  NoteOutput,
-  UserOutput,
-} from "../../server/routers/_app";
-import { notesRouter } from "../../server/routers/notes.router";
 
+import { notesRouter } from "../../server/routers/notes/notes.router";
+import type { RouterOutputs } from "../../server/routers/_app";
 type QueryType = "kit" | "user" | "note";
 
 type Props = {
   key: string;
   searchText: string;
   type: QueryType;
-  _kits: KitOutput["searchForKit"];
-  _users: UserOutput["searchForUser"];
-  _notes: NoteOutput["searchForNote"];
+  _kits: RouterOutputs["kit"]["searchForKit"];
+  _users: RouterOutputs["user"]["searchForUser"];
+  _notes: RouterOutputs["note"]["searchForNote"];
   nickname: string | null;
 };
 
@@ -294,10 +290,10 @@ export const getServerSideProps = async ({
   const noteCaller = notesRouter.createCaller({ prismaClient, req, res });
   const auth = await isUserLoggedIn(req);
 
-  let kits: KitOutput["searchForKit"] = [];
-  let notes: NoteOutput["searchForNote"] = [];
-  let users: UserOutput["searchForUser"] = [];
-
+  let kits: RouterOutputs["kit"]["searchForKit"] = [];
+  let notes: RouterOutputs["note"]["searchForNote"] = [];
+  let users: RouterOutputs["user"]["searchForUser"] = [];
+  //TODO: Rewrite?
   if (type === "kit") {
     kits = await kitCaller.searchForKit({ name: searchText });
   }

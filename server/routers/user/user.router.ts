@@ -1,7 +1,8 @@
 import type { User } from "@prisma/client";
 import { z } from "zod";
-import { procedure, router } from "../trpc";
-import { authorizedProcedure } from "../trpc";
+import { procedure, router } from "../../trpc";
+import { authorizedProcedure } from "../../trpc";
+import { editUserSchema } from "./schemas";
 
 export type UserWithoutPassword = Omit<User, "password">;
 
@@ -19,12 +20,7 @@ export const usersRouter = router({
     }),
 
   editUser: authorizedProcedure
-    .input(
-      z.object({
-        description: z.string().min(5).optional(),
-        avatarSeed: z.string().optional(),
-      })
-    )
+    .input(editUserSchema)
     .mutation(async ({ ctx, input }) => {
       await ctx.prismaClient.user.update({
         where: { id: ctx.session.userId },

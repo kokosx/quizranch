@@ -7,7 +7,7 @@ import Layout from "../components/layout";
 import { isUserLoggedIn } from "../services/auth.service";
 
 import { trpc } from "../utils/trpc";
-import { registerSchema } from "../server/schemas";
+import { registerSchema } from "../server/routers/auth/schemas";
 import type { TRPCClientErrorLike } from "@trpc/client";
 import type { AppRouter } from "../server/routers/_app";
 

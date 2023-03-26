@@ -1,13 +1,9 @@
 import { TRPCError } from "@trpc/server";
-import { type TypeOf, z } from "zod";
-import {
-  MAX_NOTE_AMOUNT,
-  MAX_NOTE_LENGTH,
-  MAX_NOTE_NAME_LENGTH,
-} from "../../constants";
+import { z } from "zod";
+import { MAX_NOTE_AMOUNT } from "../../../constants";
 
-import { authorizedProcedure, procedure, router } from "../trpc";
-import { searchForNoteService } from "../../services/notes.service";
+import { authorizedProcedure, procedure, router } from "../../trpc";
+import { addNoteSchema, updateNoteSchema } from "./schemas";
 
 export const noteBelongsToUser = ({
   usersNotes,
@@ -17,21 +13,8 @@ export const noteBelongsToUser = ({
   noteId: string;
 }): boolean => usersNotes.filter((v) => v.id === noteId).length === 1;
 
-export const noteVisibility = z.enum(["PUBLIC", "PRIVATE"]);
-export type NoteVisibility = TypeOf<typeof noteVisibility>;
-
 const updateNote = authorizedProcedure
-  .input(
-    z.object({
-      noteId: z.string(),
-      name: z.string().min(1).optional(),
-      data: z
-        .string()
-        .max(MAX_NOTE_LENGTH * 3)
-        .optional(),
-      visibility: noteVisibility.optional(),
-    })
-  )
+  .input(updateNoteSchema)
   .mutation(async ({ ctx, input }) => {
     if (
       !noteBelongsToUser({
@@ -53,14 +36,7 @@ const updateNote = authorizedProcedure
   });
 
 const addNote = authorizedProcedure
-  .input(
-    z.object({
-      name: z.string().min(1).max(MAX_NOTE_NAME_LENGTH),
-      createdBy: z.string(),
-      data: z.string().max(MAX_NOTE_LENGTH * 3),
-      visibility: noteVisibility,
-    })
-  )
+  .input(addNoteSchema)
   .mutation(async ({ ctx, input }) => {
     //Protect from user having more than max amount of notes
     if (ctx.session.user.notes.length >= MAX_NOTE_AMOUNT) {
@@ -82,10 +58,16 @@ const addNote = authorizedProcedure
 const searchForNote = procedure
   .input(z.object({ text: z.string(), skip: z.number().default(0) }))
   .query(async ({ ctx, input }) => {
-    return await searchForNoteService({
+    return await ctx.prismaClient.note.findMany({
+      where: {
+        name: { contains: input.text, mode: "insensitive" },
+        visibility: "PUBLIC",
+      },
+      take: 10,
       skip: input.skip,
-      text: input.text,
-      _prismaClient: ctx.prismaClient,
+      include: {
+        user: { select: { avatarSeed: true, id: true, nickname: true } },
+      },
     });
   });
 

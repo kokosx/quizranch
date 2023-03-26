@@ -1,14 +1,14 @@
 import { TRPCError } from "@trpc/server";
 import { compare, hash } from "bcrypt";
 import { z } from "zod";
-import { setSessionCookie } from "../../apiUtils/cookies";
-import { authenticatedProcedure, procedure, router } from "../trpc";
+import { setSessionCookie } from "../../../apiUtils/cookies";
+import { authenticatedProcedure, procedure, router } from "../../trpc";
 import crypto from "crypto";
 import { deleteCookie } from "cookies-next";
 import omit from "object.omit";
-import _hash from "../utils/hash";
-import { SESSION_ID_LENGTH } from "../../constants";
-import { registerSchema } from "../schemas";
+import _hash from "../../utils/hash";
+import { SESSION_ID_LENGTH } from "../../../constants";
+import { loginSchema, registerSchema } from "./schemas";
 
 export const authRouter = router({
   register: procedure.input(registerSchema).mutation(async ({ input, ctx }) => {
@@ -57,50 +57,42 @@ export const authRouter = router({
     });
     return { user: omit(user, "password") };
   }),
-  login: procedure
-    .input(
-      z.object({
-        email: z.string().email(),
-        password: z.string().min(5),
-      })
-    )
-    .mutation(async ({ input, ctx }) => {
-      const foundUser = await ctx.prismaClient.user.findUnique({
-        where: { email: input.email.toLowerCase() },
+  login: procedure.input(loginSchema).mutation(async ({ input, ctx }) => {
+    const foundUser = await ctx.prismaClient.user.findUnique({
+      where: { email: input.email.toLowerCase() },
+    });
+    if (!foundUser) {
+      throw new TRPCError({
+        code: "NOT_FOUND",
+        message: "Nie ma takiego użytkownika",
       });
-      if (!foundUser) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Nie ma takiego użytkownika",
-        });
-      }
+    }
 
-      const isPasswordValid = await compare(input.password, foundUser.password);
-      if (!isPasswordValid) {
-        throw new TRPCError({
-          code: "UNAUTHORIZED",
-          message: "Wrong password",
-        });
-      }
-      const sessionId = crypto.randomBytes(SESSION_ID_LENGTH).toString("hex");
-
-      const hashedSessionId = _hash(sessionId);
-
-      await ctx.prismaClient.session.create({
-        data: {
-          id: hashedSessionId,
-          userId: foundUser.id,
-        },
+    const isPasswordValid = await compare(input.password, foundUser.password);
+    if (!isPasswordValid) {
+      throw new TRPCError({
+        code: "UNAUTHORIZED",
+        message: "Wrong password",
       });
-      setSessionCookie(sessionId, {
-        req: ctx.req,
-        res: ctx.res,
-      });
-      return { user: omit(foundUser, "password") };
-    }),
+    }
+    const sessionId = crypto.randomBytes(SESSION_ID_LENGTH).toString("hex");
+
+    const hashedSessionId = _hash(sessionId);
+
+    await ctx.prismaClient.session.create({
+      data: {
+        id: hashedSessionId,
+        userId: foundUser.id,
+      },
+    });
+    setSessionCookie(sessionId, {
+      req: ctx.req,
+      res: ctx.res,
+    });
+    return { user: omit(foundUser, "password") };
+  }),
   logout: procedure.mutation(async ({ ctx }) => {
     const existingCookie = ctx.req.cookies["sessionId"];
-
     //Delete cookie
     if (existingCookie) {
       const hashedSessionId = _hash(existingCookie);

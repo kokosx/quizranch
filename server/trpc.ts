@@ -1,5 +1,5 @@
 import { initTRPC, TRPCError } from "@trpc/server";
-import { Context } from "./context";
+import type { Context } from "./context";
 import superjson from "superjson";
 import { isUserLoggedIn } from "../services/auth.service";
 // Avoid exporting the entire t-object

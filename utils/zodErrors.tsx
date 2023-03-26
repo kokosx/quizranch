@@ -1,5 +1,5 @@
 import { TRPCClientError } from "@trpc/client";
-import { KitRouter } from "../server/routers/kits.router";
+import { KitRouter } from "../server/routers/kits/kits.router";
 
 const zodStringToJSX = (_message: string) => {
   //TODO: add types

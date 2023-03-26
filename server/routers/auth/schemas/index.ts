@@ -11,3 +11,8 @@ export const registerSchema = z.object({
     .min(3, "Nazwa musi mieć pomiędzy 3 a 15 znakami")
     .max(15, "Nazwa musi mieć pomiędzy 3 a 15 znakami"),
 });
+
+export const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(5),
+});

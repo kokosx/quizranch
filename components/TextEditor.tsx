@@ -6,10 +6,9 @@ import CharacterCount from "@tiptap/extension-character-count";
 import { MAX_NOTE_LENGTH, MAX_NOTE_NAME_LENGTH } from "../constants";
 
 import { type FormEvent, useEffect, useState } from "react";
-import type { NoteVisibility } from "../server/routers/notes.router";
 import { csrfHeader, trpc } from "../utils/trpc";
 import { useRouter } from "next/router";
-import type { Note } from "@prisma/client";
+import type { Note, NoteVisibility } from "@prisma/client";
 import TextEditorBar from "./TextEditorBar";
 import ErrorDialog from "./styled/ErrorDialog";
 

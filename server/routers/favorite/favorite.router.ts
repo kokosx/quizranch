@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { authenticatedProcedure, router } from "../trpc";
-import { kitBelongsToUser } from "./kits.router";
-import { noteBelongsToUser } from "./notes.router";
+import { authenticatedProcedure, router } from "../../trpc";
+import { kitBelongsToUser } from "../kits/kits.router";
+import { noteBelongsToUser } from "../notes/notes.router";
 
 const setFavoredKit = authenticatedProcedure
   .input(z.object({ kitId: z.string() }))
