@@ -3,7 +3,7 @@ import { MAX_NOTE_LENGTH, MAX_NOTE_NAME_LENGTH } from "../../../../constants";
 import type { NoteVisibility } from "@prisma/client";
 
 //Zod infers all enum types, only PUBLIC is needed
-const noteVisibility: z.ZodType<NoteVisibility> = z.enum(["PUBLIC"]);
+const noteVisibility: z.ZodType<NoteVisibility> = z.enum(["PUBLIC", "PRIVATE"]);
 export const addNoteSchema = z.object({
   name: z.string().min(1).max(MAX_NOTE_NAME_LENGTH),
   createdBy: z.string(),
