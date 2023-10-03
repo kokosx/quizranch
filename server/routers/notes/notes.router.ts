@@ -42,6 +42,7 @@ const addNote = authorizedProcedure
     if (ctx.session.user.notes.length >= MAX_NOTE_AMOUNT) {
       throw new TRPCError({ code: "CONFLICT" });
     }
+    await ctx.prismaClient.user.findFirst({ where: {} });
 
     const note = await ctx.prismaClient.note.create({
       data: {
